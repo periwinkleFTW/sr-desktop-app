@@ -1,6 +1,7 @@
-from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
+try:
+    from PySide2.QtCore    import Qt
+    from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
     QTableWidgetItem, QTableWidget, QGroupBox, QCheckBox, QAbstractItemView, QTableView
-from PySide2.QtCore import Qt
 
 from backend import Database
 from issues_actions import IssuesActions
@@ -11,12 +12,17 @@ db = Database("sr-data.db")
 class IssuesTab(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self)
-
         self.Parent = parent
+
+        self.IssueTitle = 'Issues'
 
         self.actions = IssuesActions(self)
 
         self.UI()
+
+    @property
+    def Title(self):
+        return self.IssueTitle
 
     def UI(self):
         self.widgets()

@@ -5,11 +5,15 @@ from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioBut
 class PeopleTab(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self)
-
         self.Parent = parent
+
+        self.PeoplTitle = 'People'
 
         self.UI()
 
+    @property
+    def Title(self):
+        return self.PeoplTitle
 
     def UI(self):
         self.widgets()

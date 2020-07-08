@@ -9,11 +9,13 @@ try:
     from PySide2.QtWidgets import QApplication, QMainWindow
 
 except ImportError:
-    from PySide2.QtGui     import QIcon
-    from PySide2.QtWidgets import QApplication, QMainWindow
+    from PyQt5.QtGui     import QIcon
+    from PyQt5.QtWidgets import QApplication, QMainWindow
 
 from sys import exit as sysExit
 from center_pane import CenterPanel
+from backend     import Database
+
 
 class Main(QMainWindow):
     def __init__(self):
@@ -21,6 +23,8 @@ class Main(QMainWindow):
         self.setWindowTitle("SR test")
         self.setWindowIcon(QIcon("assets/icons/logo-dark.png"))
         self.setGeometry(150, 150, 1470, 750)
+
+        self.SmpRptDbase = Database("sr-data.db")
 
         self.CenterPane = CenterPanel(self)
         self.setCentralWidget(self.CenterPane)

@@ -1,18 +1,31 @@
-from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
-    QTableWidgetItem, QTableWidget, QGroupBox, QHeaderView, QTableView, QAbstractItemView, QCheckBox
+try:
+   from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton
+   from PySide2.QtWidgets import QRadioButton, QHBoxLayout, QVBoxLayout
+   from PySide2.QtWidgets import QTableWidgetItem, QTableWidget, QGroupBox, 
+   from PySide2.QtWidgets import QHeaderView, QTableView, QAbstractItemView, QCheckBox
+
+except ImportError:
+   from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton
+   from PyQt5.QtWidgets import QRadioButton, QHBoxLayout, QVBoxLayout
+   from PyQt5.QtWidgets import QTableWidgetItem, QTableWidget, QGroupBox, 
+   from PyQt5.QtWidgets import QHeaderView, QTableView, QAbstractItemView, QCheckBox
 
 from backend import Database
 
 db = Database("sr-data.db")
 
-class FacilitiesTab(QWidget):
+class FacltyTab(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self)
-
         self.Parent = parent
+
+        self.FcltyTitle = 'Facilities'
 
         self.UI()
 
+    @property
+    def Title(self):
+        return self.FcltyTitle
 
     def UI(self):
         self.widgets()
@@ -127,32 +140,3 @@ class FacilitiesTab(QWidget):
 
         self.setLayout(self.facilitiesMainLayout)
 
-    # Populating tables
-    def displayIssues(self):
-        for i in reversed(range(self.issuesTable.rowCount())):
-            self.issuesTable.removeRow(i)
-
-        issues = db.cur.execute("SELECT * FROM issues")
-
-        for row_data in issues:
-            row_number = self.issuesTable.rowCount()
-            self.issuesTable.insertRow(row_number)
-            # Add checkboxes to the table
-            qwidget = QWidget()
-            checkbox = QCheckBox()
-            checkbox.setCheckState(Qt.Unchecked)
-            qhboxlayout = QHBoxLayout(qwidget)
-            qhboxlayout.addWidget(checkbox)
-            qhboxlayout.setAlignment(Qt.AlignRight)
-            qhboxlayout.setContentsMargins(0, 0, 20, 0)
-            self.issuesTable.setCellWidget(row_number, 0, qwidget)
-            self.issuesTable.setItem(row_number, 1, QTableWidgetItem(str(row_number)))
-
-            for column_number, data in enumerate(row_data):
-                if column_number == 0:
-                    self.issuesTable.setItem(row_number, column_number, QTableWidgetItem("ISS#" + str(data)))
-                else:
-                    self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
-
-        self.issuesTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.issuesTable.setSelectionBehavior(QTableView.SelectRows)
