@@ -1,13 +1,13 @@
 try:
    from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton
    from PySide2.QtWidgets import QRadioButton, QHBoxLayout, QVBoxLayout
-   from PySide2.QtWidgets import QTableWidgetItem, QTableWidget, QGroupBox, 
+   from PySide2.QtWidgets import QTableWidgetItem, QTableWidget, QGroupBox
    from PySide2.QtWidgets import QHeaderView, QTableView, QAbstractItemView, QCheckBox
 
 except ImportError:
    from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton
    from PyQt5.QtWidgets import QRadioButton, QHBoxLayout, QVBoxLayout
-   from PyQt5.QtWidgets import QTableWidgetItem, QTableWidget, QGroupBox, 
+   from PyQt5.QtWidgets import QTableWidgetItem, QTableWidget, QGroupBox
    from PyQt5.QtWidgets import QHeaderView, QTableView, QAbstractItemView, QCheckBox
 
 from backend import Database

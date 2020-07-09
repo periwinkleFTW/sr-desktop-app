@@ -1,10 +1,20 @@
 try:
-    from PySide2.QtCore    import Qt
+    from PySide2.QtCore import Qt
     from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
-    QTableWidgetItem, QTableWidget, QGroupBox, QCheckBox, QAbstractItemView, QTableView
+        QTableWidgetItem, QTableWidget, QGroupBox, QCheckBox, QAbstractItemView, QTableView, QMessageBox, QFileDialog
+except:
+    from PyQt.QtCore import Qt
+    from PyQt.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
+        QTableWidgetItem, QTableWidget, QGroupBox, QCheckBox, QAbstractItemView, QTableView, QMessageBox, QFileDialog
+
+import datetime
+import csv
+import xlsxwriter
+import sys
 
 from backend import Database
-from issues_actions import IssuesActions
+from add_issue import AddIssue
+from display_issue import DisplayIssue
 
 db = Database("sr-data.db")
 
@@ -16,8 +26,6 @@ class IssuesTab(QWidget):
 
         self.IssueTitle = 'Issues'
 
-        self.actions = IssuesActions(self)
-
         self.UI()
 
     @property
@@ -27,6 +35,7 @@ class IssuesTab(QWidget):
     def UI(self):
         self.widgets()
         self.layouts()
+        self.funcDisplayIssues()
 
     def widgets(self):
         # Issues widgets ###########################################################
@@ -35,7 +44,7 @@ class IssuesTab(QWidget):
         self.searchIssuesEntry = QLineEdit()
         self.searchIssuesEntry.setPlaceholderText("Search issues..")
         self.searchIssuesBtn = QPushButton("Search")
-        # self.searchIssuesBtn.clicked.connect(self.searchIssues)
+        self.searchIssuesBtn.clicked.connect(self.funcSearchIssues)
 
         # Middle layout (list issues) widgets with radio buttons
         self.allIssuesRadioBtn = QRadioButton("All issues")
@@ -43,7 +52,7 @@ class IssuesTab(QWidget):
         self.lateIssuesRadioBtn = QRadioButton("Late issues")
         self.closedIssuesRadioBtn = QRadioButton("Closed issues")
         self.listIssuesBtn = QPushButton("List issues")
-        # self.listIssuesBtn.clicked.connect(self.listIssues)
+        self.listIssuesBtn.clicked.connect(self.funcListIssues)
 
         # Bottom layout widget
         # Table showing issues
@@ -68,23 +77,23 @@ class IssuesTab(QWidget):
         self.issuesTable.setHorizontalHeaderItem(15, QTableWidgetItem("Created on"))
 
         # Double clicking a row opens a window with issue details
-        # self.issuesTable.doubleClicked.connect(self.selectedIssue)
+        self.issuesTable.doubleClicked.connect(self.funcSelectedIssue)
 
         # Buttons for actions on selected issues
         self.refreshIssuesBtn = QPushButton("Refresh")
-        # self.refreshIssuesBtn.clicked.connect(self.displayIssues)
+        self.refreshIssuesBtn.clicked.connect(self.funcDisplayIssues)
         self.addIssue = QPushButton("Add issue")
-        self.addIssue.clicked.connect(self.actions.funcAddIssue)
+        self.addIssue.clicked.connect(self.funcAddIssue)
         self.viewIssue = QPushButton("View/Edit issue")
-        # self.viewIssue.clicked.connect(self.selectedIssue)
+        self.viewIssue.clicked.connect(self.funcSelectedIssue)
         self.closeIssueBtn = QPushButton("Close issue")
-        # self.closeIssueBtn.clicked.connect(self.funcCloseIssue)
+        self.closeIssueBtn.clicked.connect(self.funcCloseIssue)
         self.deleteIssue = QPushButton("Delete issue")
-        # self.deleteIssue.clicked.connect(self.funcDeleteIssue)
+        self.deleteIssue.clicked.connect(self.funcDeleteIssue)
         self.exportIssuesCSVBtn = QPushButton("Export CSV")
-        # self.exportIssuesCSVBtn.clicked.connect(self.funcIssuesToCSV)
+        self.exportIssuesCSVBtn.clicked.connect(self.funcIssuesToCSV)
         self.exportIssuesXLSXBtn = QPushButton("Export XLSX")
-        # self.exportIssuesXLSXBtn.clicked.connect(self.funcIssuestoXLSX)
+        self.exportIssuesXLSXBtn.clicked.connect(self.funcIssuestoXLSX)
 
     def layouts(self):
         # Issues layouts ###########################################################
@@ -147,7 +156,8 @@ class IssuesTab(QWidget):
         self.setLayout(self.issuesMainLayout)
 
     # Populating the table
-    def displayIssues(self):
+    # DONE
+    def funcDisplayIssues(self):
         for i in reversed(range(self.issuesTable.rowCount())):
             self.issuesTable.removeRow(i)
 
@@ -175,3 +185,233 @@ class IssuesTab(QWidget):
 
         self.issuesTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.issuesTable.setSelectionBehavior(QTableView.SelectRows)
+
+    # DONE
+    def funcAddIssue(self):
+        self.newIssue = AddIssue(self)
+
+    # DONE
+    def funcIssuesCheckBox(self):
+        checked_list = []
+        for i in range(self.issuesTable.rowCount()):
+            if self.issuesTable.cellWidget(i, 0).findChild(type(QCheckBox())).isChecked():
+                item = self.issuesTable.item(i, 0).text()
+                checked_list.append(item.lstrip("ISS#"))
+        return checked_list
+
+    # DONE
+    def funcSelectedIssue(self):
+        self.displayIssue = DisplayIssue(self)
+
+    # DONE
+    def funcSearchIssues(self):
+        value = self.searchIssuesEntry.text()
+        if value == "":
+            QMessageBox.information(self, "Warning", "Search string cannot be empty")
+            self.funcDisplayIssues()
+        else:
+            # Erase search entry
+            self.searchIssuesEntry.setText("")
+            query = "SELECT * FROM issues WHERE " \
+                    "issue_id LIKE ? " \
+                    "OR issue_date LIKE ?" \
+                    "OR issue_priority LIKE ?" \
+                    "OR issue_observer LIKE ?" \
+                    "OR issue_team LIKE ?" \
+                    "OR issue_inspection LIKE ?" \
+                    "OR issue_theme LIKE ?" \
+                    "OR issue_facility LIKE ?" \
+                    "OR issue_fac_supervisor LIKE ?" \
+                    "OR issue_spec_loc LIKE ?" \
+                    "OR issue_insp_dept LIKE ?" \
+                    "OR issue_insp_contr LIKE ?" \
+                    "OR issue_insp_subcontr LIKE ?" \
+                    "OR issue_deadline LIKE ?"
+            results = db.cur.execute(query, ('%' + value + '%', '%' + value + '%', '%' + value + '%', '%' + value + '%',
+                                             '%' + value + '%', '%' + value + '%', '%' + value + '%', '%' + value + '%',
+                                             '%' + value + '%', '%' + value + '%', '%' + value + '%', '%' + value + '%',
+                                             '%' + value + '%', '%' + value + '%',)).fetchall()
+            if results == []:
+                QMessageBox.information(self, "Info", "Nothing was found")
+                self.funcDisplayIssues()
+            else:
+                for i in reversed(range(self.issuesTable.rowCount())):
+                    self.issuesTable.removeRow(i)
+
+                for row_data in results:
+                    row_number = self.issuesTable.rowCount()
+                    self.issuesTable.insertRow(row_number)
+                    for column_number, data in enumerate(row_data):
+                        self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+
+    # DONE
+    def funcListIssues(self):
+        if self.allIssuesRadioBtn.isChecked():
+            self.funcDisplayIssues()
+        elif self.ongoingIssuesRadioBtn.isChecked():
+            query = "SELECT * FROM issues WHERE status='Open' " \
+                    "AND issue_deadline > DATETIME('now')"
+            issues = db.cur.execute(query).fetchall()
+
+            for i in reversed(range(self.issuesTable.rowCount())):
+                self.issuesTable.removeRow(i)
+
+            for row_data in issues:
+                row_number = self.issuesTable.rowCount()
+                self.issuesTable.insertRow(row_number)
+                for column_number, data in enumerate(row_data):
+                    self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+        elif self.lateIssuesRadioBtn.isChecked():
+            query = "SELECT * FROM issues WHERE status='Open' AND issue_deadline < DATETIME('now')"
+            issues = db.cur.execute(query).fetchall()
+
+            for i in reversed(range(self.issuesTable.rowCount())):
+                self.issuesTable.removeRow(i)
+
+            for row_data in issues:
+                row_number = self.issuesTable.rowCount()
+                self.issuesTable.insertRow(row_number)
+                for column_number, data in enumerate(row_data):
+                    self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+        elif self.closedIssuesRadioBtn.isChecked():
+            query = "SELECT * FROM issues WHERE status='Closed'"
+            issues = db.cur.execute(query).fetchall()
+
+            for i in reversed(range(self.issuesTable.rowCount())):
+                self.issuesTable.removeRow(i)
+
+            for row_data in issues:
+                row_number = self.issuesTable.rowCount()
+                self.issuesTable.insertRow(row_number)
+                for column_number, data in enumerate(row_data):
+                    self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+
+
+    # TODO make it work with indices, now it only works with selection
+    def funcCloseIssue(self):
+        row = self.issuesTable.currentRow()
+        issueId = self.issuesTable.item(row, 0).text()
+        issueId = issueId.lstrip("ISS#")
+
+        try:
+            statusQuery = "SELECT status FROM issues WHERE issue_id=?"
+            currentStatus = db.cur.execute(statusQuery, (issueId,)).fetchone()
+
+            if currentStatus[0] == "Open":
+                query = "UPDATE issues SET status='Closed' WHERE issue_id=?"
+
+                db.cur.execute(query, (issueId,))
+                db.conn.commit()
+
+                QMessageBox.information(self, "Info", "Issue closed successfully")
+                self.funcDisplayIssues()
+            else:
+                QMessageBox.information(self, "Info", "Issue is already closed")
+
+        except:
+            QMessageBox.information(self, "Info", "Something went wrong")
+
+    # DONE
+    def funcDeleteIssue(self):
+        row = self.issuesTable.currentRow()
+        issueId = self.issuesTable.item(row, 0).text()
+        issueId = issueId.lstrip("ISS#")
+
+        mbox = QMessageBox.question(self, "Warning", "Are you sure you want to delete issue " + issueId + "?",
+                                    QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
+
+        if (mbox == QMessageBox.Yes):
+            try:
+                query = "DELETE FROM issues WHERE issue_id = ?"
+
+                db.cur.execute(query, (issueId,))
+                db.conn.commit()
+
+                QMessageBox.information(self, "Info", "Issue was deleted")
+                self.funcDisplayIssues()
+            except:
+                QMessageBox.information(self, "Info", "No changes made")
+
+    # DONE
+    def funcIssuesToCSV(self):
+        indices = self.funcIssuesCheckBox()
+        # Check if there are any selected items
+        if indices:
+            try:
+                date = datetime.datetime.now()
+
+                # Get file location and add timestamp to when it was created to the filename
+                fileName, _ = QFileDialog.getSaveFileName(
+                    self, "Save as...", "~/exportIssCSV" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".csv",
+                    "CSV files (*.csv)")
+                if fileName:
+                    with open(fileName, "w") as csv_file:
+                        csv_writer = csv.writer(csv_file, delimiter="|")
+                        # Setting cursor on the correct table
+                        db.cur.execute("SELECT * FROM issues")
+                        # Get headers
+                        csv_writer.writerow([i[0] for i in db.cur.description])
+                        for index in indices:
+                            query = "SELECT * FROM issues WHERE issue_id=?"
+                            facility_record = db.cur.execute(query, (index,)).fetchone()
+                            csv_writer.writerow(facility_record)
+
+                    QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
+            except:
+                QMessageBox.information(self, "Info", "Export failed")
+        else:
+            QMessageBox.information(
+                self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")
+
+    # DONE
+    def funcIssuestoXLSX(self):
+        indices = self.funcIssuesCheckBox()
+
+        if indices:
+            try:
+                date = datetime.datetime.now()
+
+                # Get file location and add timestamp to when it was created to the filename
+                fileName, _ = QFileDialog.getSaveFileName(
+                    self, "Save as...", "~/exportIssXLSX" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".xlsx",
+                    "Excel files (*.xlsx)")
+                if fileName:
+                    db.cur.execute("SELECT * FROM issues")
+
+                    workbook = xlsxwriter.Workbook(fileName)
+                    worksheet = workbook.add_worksheet("Issues")
+
+                    # Create header row
+                    col = 0
+                    for value in db.cur.description:
+                        worksheet.write(0, col, value[0])
+                        col += 1
+
+                    # Write date to xlsx file
+                    # for row_number in range(1, len(indices) + 1):
+
+                    row_number = 1
+                    for index in range(len(indices)):
+                        query = "SELECT * FROM issues WHERE issue_id=?"
+                        issue_record = db.cur.execute(query, (indices[index],)).fetchone()
+                        print("writing row: " + str(row_number))
+                        print("Fetching issue#: " + indices[index])
+                        for i, value in enumerate(issue_record):
+                            print("Writing values for row " + str(row_number) + " and index " + str(indices[index]))
+                            worksheet.write(row_number, i, value)
+
+                        print("Finished writing data for index " + str(indices[index]) + " in row " + str(row_number))
+                        row_number += 1
+                        print("New row_number is " + str(row_number))
+
+
+
+                    workbook.close()
+
+                    QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
+
+            except:
+                QMessageBox.information(self, "Info", "Export failed")
+        else:
+            QMessageBox.information(
+                self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")

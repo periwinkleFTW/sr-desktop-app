@@ -26,7 +26,6 @@ class DisplayIssue(QWidget):
         self.layouts()
 
     def issueDetails(self):
-
         row = self.Parent.issuesTable.currentRow()
         issueId = self.Parent.issuesTable.item(row, 0).text()
         # Strip the ISS# from the id

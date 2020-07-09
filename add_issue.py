@@ -165,9 +165,9 @@ class AddIssue(QWidget):
                                        inspectedSubcontr, deadline, now))
                 db.conn.commit()
 
-                self.Parent.displayIssues()
-
                 QMessageBox.information(self, "Info", "Issue has been added")
+                self.Parent.funcDisplayIssues()
+
                 self.close()
             except:
                 QMessageBox.information(self, "Info", "Issue has not been added")
