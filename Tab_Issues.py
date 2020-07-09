@@ -289,27 +289,50 @@ class IssuesTab(QWidget):
 
     # TODO make it work with indices, now it only works with selection
     def funcCloseIssue(self):
-        row = self.issuesTable.currentRow()
-        issueId = self.issuesTable.item(row, 0).text()
-        issueId = issueId.lstrip("ISS#")
+        indices = self.funcIssuesCheckBox()
+        # Close issues with selected checkboxes
+        if indices:
+            try:
+                for index in range(len(indices)):
+                    statusQuery = "SELECT status FROM issues WHERE issue_id=?"
+                    currentStatus = db.cur.execute(statusQuery, (indices[index],)).fetchone()
 
-        try:
-            statusQuery = "SELECT status FROM issues WHERE issue_id=?"
-            currentStatus = db.cur.execute(statusQuery, (issueId,)).fetchone()
+                    if currentStatus[0] == "Open":
+                        query = "UPDATE issues SET status='Closed' WHERE issue_id=?"
 
-            if currentStatus[0] == "Open":
-                query = "UPDATE issues SET status='Closed' WHERE issue_id=?"
+                        db.cur.execute(query, (indices[index],))
+                        db.conn.commit()
+                    else:
+                        QMessageBox.information(self, "Info", "Issue {} is already closed".format(indices[index]))
 
-                db.cur.execute(query, (issueId,))
-                db.conn.commit()
-
-                QMessageBox.information(self, "Info", "Issue closed successfully")
+                QMessageBox.information(self, "Info", "Issues closed successfully")
                 self.funcDisplayIssues()
-            else:
-                QMessageBox.information(self, "Info", "Issue is already closed")
 
-        except:
-            QMessageBox.information(self, "Info", "Something went wrong")
+            except:
+                QMessageBox.information(self, "Info", "Something went wrong")
+        # This block closes highlighted issue
+        else:
+            row = self.issuesTable.currentRow()
+            issueId = self.issuesTable.item(row, 0).text()
+            issueId = issueId.lstrip("ISS#")
+
+            try:
+                statusQuery = "SELECT status FROM issues WHERE issue_id=?"
+                currentStatus = db.cur.execute(statusQuery, (issueId,)).fetchone()
+
+                if currentStatus[0] == "Open":
+                    query = "UPDATE issues SET status='Closed' WHERE issue_id=?"
+
+                    db.cur.execute(query, (issueId,))
+                    db.conn.commit()
+
+                    QMessageBox.information(self, "Info", "Issue closed successfully")
+                    self.funcDisplayIssues()
+                else:
+                    QMessageBox.information(self, "Info", "Issue is already closed")
+
+            except:
+                QMessageBox.information(self, "Info", "Something went wrong")
 
     # DONE
     def funcDeleteIssue(self):
@@ -388,28 +411,17 @@ class IssuesTab(QWidget):
                         col += 1
 
                     # Write date to xlsx file
-                    # for row_number in range(1, len(indices) + 1):
-
                     row_number = 1
                     for index in range(len(indices)):
                         query = "SELECT * FROM issues WHERE issue_id=?"
                         issue_record = db.cur.execute(query, (indices[index],)).fetchone()
-                        print("writing row: " + str(row_number))
-                        print("Fetching issue#: " + indices[index])
                         for i, value in enumerate(issue_record):
-                            print("Writing values for row " + str(row_number) + " and index " + str(indices[index]))
                             worksheet.write(row_number, i, value)
-
-                        print("Finished writing data for index " + str(indices[index]) + " in row " + str(row_number))
                         row_number += 1
-                        print("New row_number is " + str(row_number))
-
-
 
                     workbook.close()
 
                     QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
-
             except:
                 QMessageBox.information(self, "Info", "Export failed")
         else:

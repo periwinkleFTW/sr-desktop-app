@@ -175,5 +175,5 @@ class DisplayIssue(QWidget):
         else:
             QMessageBox.information(self, "Info", "Fields cannot be empty")
 
-        self.Parent.displayIssues()
+        self.Parent.funcDisplayIssues()
         self.close()
