@@ -156,7 +156,6 @@ class IssuesTab(QWidget):
         self.setLayout(self.issuesMainLayout)
 
     # Populating the table
-    # DONE
     def funcDisplayIssues(self):
         for i in reversed(range(self.issuesTable.rowCount())):
             self.issuesTable.removeRow(i)
@@ -186,11 +185,9 @@ class IssuesTab(QWidget):
         self.issuesTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.issuesTable.setSelectionBehavior(QTableView.SelectRows)
 
-    # DONE
     def funcAddIssue(self):
         self.newIssue = AddIssue(self)
 
-    # DONE
     def funcIssuesCheckBox(self):
         checked_list = []
         for i in range(self.issuesTable.rowCount()):
@@ -199,11 +196,9 @@ class IssuesTab(QWidget):
                 checked_list.append(item.lstrip("ISS#"))
         return checked_list
 
-    # DONE
     def funcSelectedIssue(self):
         self.displayIssue = DisplayIssue(self)
 
-    # DONE
     def funcSearchIssues(self):
         value = self.searchIssuesEntry.text()
         if value == "":
@@ -244,7 +239,6 @@ class IssuesTab(QWidget):
                     for column_number, data in enumerate(row_data):
                         self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
 
-    # DONE
     def funcListIssues(self):
         if self.allIssuesRadioBtn.isChecked():
             self.funcDisplayIssues()
@@ -286,8 +280,6 @@ class IssuesTab(QWidget):
                 for column_number, data in enumerate(row_data):
                     self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
 
-
-    # DONE
     def funcCloseIssue(self):
         indices = self.funcIssuesCheckBox()
         # Close issues with selected checkboxes
@@ -310,7 +302,6 @@ class IssuesTab(QWidget):
 
             except:
                 QMessageBox.information(self, "Info", "Something went wrong")
-        # This block closes highlighted issue
         else:
             row = self.issuesTable.currentRow()
             issueId = self.issuesTable.item(row, 0).text()
@@ -334,29 +325,42 @@ class IssuesTab(QWidget):
             except:
                 QMessageBox.information(self, "Info", "Something went wrong")
 
-    # DONE
     def funcDeleteIssue(self):
-        row = self.issuesTable.currentRow()
-        issueId = self.issuesTable.item(row, 0).text()
-        issueId = issueId.lstrip("ISS#")
+        indices = self.funcIssuesCheckBox()
 
-        mbox = QMessageBox.question(self, "Warning", "Are you sure you want to delete issue " + issueId + "?",
+        mbox = QMessageBox.question(self, "Warning", "Are you sure you want to delete selected issue(s)?",
                                     QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
 
         if (mbox == QMessageBox.Yes):
-            try:
-                query = "DELETE FROM issues WHERE issue_id = ?"
+            if indices:
+                try:
+                    for index in range(len(indices)):
+                        query = "DELETE FROM issues WHERE issue_id = ?"
 
-                db.cur.execute(query, (issueId,))
-                db.conn.commit()
+                        db.cur.execute(query, (indices[index],))
+                        db.conn.commit()
 
-                QMessageBox.information(self, "Info", "Issue was deleted")
-                self.funcDisplayIssues()
-            except:
-                QMessageBox.information(self, "Info", "No changes made")
-        self.displayIssue.close()
+                    QMessageBox.information(self, "Info", "Issues were deleted")
+                    self.funcDisplayIssues()
+                except:
+                    QMessageBox.information(self, "Info", "No changes made")
+            else:
+                row = self.issuesTable.currentRow()
+                issueId = self.issuesTable.item(row, 0).text()
+                issueId = issueId.lstrip("ISS#")
+                try:
+                    query = "DELETE FROM issues WHERE issue_id = ?"
 
-    # DONE
+                    db.cur.execute(query, (issueId,))
+                    db.conn.commit()
+
+                    QMessageBox.information(self, "Info", "Issue was deleted")
+                    self.funcDisplayIssues()
+                except:
+                    QMessageBox.information(self, "Info", "No changes made")
+
+            self.displayIssue.close()
+
     def funcIssuesToCSV(self):
         indices = self.funcIssuesCheckBox()
         # Check if there are any selected items
@@ -387,7 +391,6 @@ class IssuesTab(QWidget):
             QMessageBox.information(
                 self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")
 
-    # DONE
     def funcIssuestoXLSX(self):
         indices = self.funcIssuesCheckBox()
 

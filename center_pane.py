@@ -18,7 +18,7 @@ except ImportError:
 # grouped as you can see how this looks when done this way
 from Tab_Issues import IssuesTab
 from Tab_People import PeopleTab
-from Tab_Faclty import FacltyTab
+from Tab_Facility import FacilityTab
 
 class CenterPanel(QWidget):
     def __init__(self, parent):
@@ -27,12 +27,12 @@ class CenterPanel(QWidget):
 
         self.tbIssue = IssuesTab(self)
         self.tbPeople = PeopleTab(self)
-        # self.tbFclty = FacltyTab(self)
+        self.tbFclty = FacilityTab(self)
 
         self.TabHldr = QTabWidget()
         self.TabHldr.addTab(self.tbIssue, self.tbIssue.Title)
         self.TabHldr.addTab(self.tbPeople, self.tbPeople.Title)
-#        self.TabHldr.addTab(self.tbFclty, self.tbFclty.Title)
+        self.TabHldr.addTab(self.tbFclty, self.tbFclty.Title)
 
         HBox = QHBoxLayout()
         HBox.addWidget(self.TabHldr)
