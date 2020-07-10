@@ -200,24 +200,38 @@ class PeopleTab(QWidget):
 
     # TODO make it work with check boxes
     def funcDeletePerson(self):
-        row = self.peopleTable.currentRow()
-        personId = self.peopleTable.item(row, 0).text()
-        personId = personId.lstrip("PRN#")
+        indices = self.funcPeopleCheckBox()
 
         mbox = QMessageBox.question(self, "Warning", "Are you sure you want to delete this person?",
                                     QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
 
         if (mbox == QMessageBox.Yes):
-            try:
-                query = "DELETE FROM people WHERE person_id = ?"
+            if indices:
+                try:
+                    for index in range(len(indices)):
+                        query = "DELETE FROM people WHERE person_id = ?"
 
-                db.cur.execute(query, (personId,))
-                db.conn.commit()
+                        db.cur.execute(query, (indices[index],))
+                        db.conn.commit()
 
-                QMessageBox.information(self, "Info", "Person was deleted")
-                self.funcDisplayPeople()
-            except:
-                QMessageBox.information(self, "Info", "No changes made")
+                    QMessageBox.information(self, "Info", "Selected people were deleted")
+                    self.funcDisplayPeople()
+                except:
+                    QMessageBox.information(self, "Info", "No changes made")
+            else:
+                row = self.peopleTable.currentRow()
+                personId = self.peopleTable.item(row, 0).text()
+                personId = personId.lstrip("PRN#")
+                try:
+                    query = "DELETE FROM people WHERE person_id = ?"
+
+                    db.cur.execute(query, (personId,))
+                    db.conn.commit()
+
+                    QMessageBox.information(self, "Info", "Person was deleted")
+                    self.funcDisplayPeople()
+                except:
+                    QMessageBox.information(self, "Info", "No changes made")
 
         self.displayPerson.close()
 

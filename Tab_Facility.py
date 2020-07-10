@@ -198,24 +198,38 @@ class FacilityTab(QWidget):
 
 
     def funcDeleteFacility(self):
-        row = self.facilitiesTable.currentRow()
-        facilityId = self.facilitiesTable.item(row, 0).text()
-        facilityId = facilityId.lstrip("FCL#")
+        indices = self.funcFacilitiesCheckBox()
 
         mbox = QMessageBox.question(self, "Warning", "Are you sure you want to delete this facility?",
                                     QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
 
         if (mbox == QMessageBox.Yes):
-            try:
-                query = "DELETE FROM facilities WHERE facility_id = ?"
+            if indices:
+                try:
+                    for index in range(len(indices)):
+                        query = "DELETE FROM facilities WHERE facility_id = ?"
 
-                db.cur.execute(query, (facilityId,))
-                db.conn.commit()
+                        db.cur.execute(query, (indices[index],))
+                        db.conn.commit()
 
-                QMessageBox.information(self, "Info", "Facility was deleted")
-                self.funcDisplayFacilities()
-            except:
-                QMessageBox.information(self, "Info", "No changes made")
+                    QMessageBox.information(self, "Info", "Facilites were deleted")
+                    self.funcDisplayFacilities()
+                except:
+                    QMessageBox.information(self, "Info", "No changes made")
+            else:
+                row = self.facilitiesTable.currentRow()
+                facilityId = self.facilitiesTable.item(row, 0).text()
+                facilityId = facilityId.lstrip("FCL#")
+                try:
+                    query = "DELETE FROM facilities WHERE facility_id = ?"
+
+                    db.cur.execute(query, (facilityId,))
+                    db.conn.commit()
+
+                    QMessageBox.information(self, "Info", "Facility was deleted")
+                    self.funcDisplayFacilities()
+                except:
+                    QMessageBox.information(self, "Info", "No changes made")
         self.displayFacility.close()
 
 
