@@ -287,7 +287,7 @@ class IssuesTab(QWidget):
                     self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
 
 
-    # TODO make it work with indices, now it only works with selection
+    # DONE
     def funcCloseIssue(self):
         indices = self.funcIssuesCheckBox()
         # Close issues with selected checkboxes
@@ -303,9 +303,9 @@ class IssuesTab(QWidget):
                         db.cur.execute(query, (indices[index],))
                         db.conn.commit()
                     else:
-                        QMessageBox.information(self, "Info", "Issue {} is already closed".format(indices[index]))
+                        QMessageBox.information(self, "Info", "Issue(s) is already closed")
 
-                QMessageBox.information(self, "Info", "Issues closed successfully")
+                QMessageBox.information(self, "Info", "Operation completed successfully")
                 self.funcDisplayIssues()
 
             except:
@@ -354,6 +354,7 @@ class IssuesTab(QWidget):
                 self.funcDisplayIssues()
             except:
                 QMessageBox.information(self, "Info", "No changes made")
+        self.displayIssue.close()
 
     # DONE
     def funcIssuesToCSV(self):

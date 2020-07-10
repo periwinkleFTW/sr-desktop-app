@@ -25,13 +25,13 @@ class CenterPanel(QWidget):
         QWidget.__init__(self)
         self.Parent = parent
 
-#        self.tbFclty = FacltyTab(self)
         self.tbIssue = IssuesTab(self)
-#        self.tbPeople = PeopleTab(self)
+        self.tbPeople = PeopleTab(self)
+        # self.tbFclty = FacltyTab(self)
 
         self.TabHldr = QTabWidget()
         self.TabHldr.addTab(self.tbIssue, self.tbIssue.Title)
-#        self.TabHldr.addTab(self.tbPeple, self.tbPeople.Title)
+        self.TabHldr.addTab(self.tbPeople, self.tbPeople.Title)
 #        self.TabHldr.addTab(self.tbFclty, self.tbFclty.Title)
 
         HBox = QHBoxLayout()
