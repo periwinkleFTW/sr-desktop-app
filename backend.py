@@ -4,7 +4,7 @@ from sqlite3 import Error
 
 # import pandas
 
-# TODO add db selection
+# TODO add db selection and other stuff
 
 
 
