@@ -4,6 +4,8 @@ from sqlite3 import Error
 
 # import pandas
 
+# TODO add db selection
+
 
 class Database:
     def __init__(self, db):
