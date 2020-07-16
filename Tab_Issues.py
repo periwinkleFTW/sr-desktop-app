@@ -15,6 +15,7 @@ import sys
 from backend import Database
 from add_issue import AddIssue
 from display_issue import DisplayIssue
+import styles
 
 db = Database("sr-data.db")
 
@@ -42,7 +43,7 @@ class IssuesTab(QWidget):
         # Top layout (search issues) widgets
         self.searchIssuesText = QLabel("Search issues: ")
         self.searchIssuesEntry = QLineEdit()
-        self.searchIssuesEntry.setPlaceholderText("Search issues..")
+        self.searchIssuesEntry.setPlaceholderText("Type here..")
         self.searchIssuesBtn = QPushButton("Search")
         self.searchIssuesBtn.clicked.connect(self.funcSearchIssues)
 
@@ -104,14 +105,21 @@ class IssuesTab(QWidget):
         self.issuesBottomRightLayout = QVBoxLayout()
         self.issuesBottomLeftLayout = QHBoxLayout()
         # Groupboxes allow customization using CSS-like syntax
-        self.issuesTopGroupBox = QGroupBox("Search Box")
+        self.issuesTopGroupBox = QGroupBox()
         self.issuesTopGroupBoxRightFiller = QGroupBox()
-        self.issuesMiddleGroupBox = QGroupBox("List Box")
+        self.issuesTopGroupBoxRightFiller.setStyleSheet(styles.groupBoxFillerStyle())
+
+        self.issuesMiddleGroupBox = QGroupBox()
         self.issuesMiddleGroupBoxRightFiller = QGroupBox()
+        self.issuesMiddleGroupBoxRightFiller.setStyleSheet(styles.groupBoxFillerStyle())
+
+
         self.issuesBottomGroupBox = QGroupBox()
-        self.issuesBottomLeftGroupBox = QGroupBox("Issues")
-        self.issuesBottomRightGroupBox = QGroupBox("Actions")
+        self.issuesBottomLeftGroupBox = QGroupBox()
+
+        self.issuesBottomRightGroupBox = QGroupBox()
         self.issuesBottomRightGroupBoxFiller = QGroupBox()
+        self.issuesBottomRightGroupBoxFiller.setStyleSheet(styles.groupBoxFillerStyle())
 
         # Add widgets
         # Top layout (search box) widgets

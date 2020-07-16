@@ -5,6 +5,7 @@
 
 try:
     from PySide2.QtWidgets import QWidget, QTabWidget, QHBoxLayout
+    from PySide2.QtGui import QLinearGradient
 
 except ImportError:
     from PyQt5.QtWidgets import QWidget, QTabWidget, QHBoxLayout
@@ -20,10 +21,14 @@ from Tab_Issues import IssuesTab
 from Tab_People import PeopleTab
 from Tab_Facility import FacilityTab
 
+import styles
+
 class CenterPanel(QWidget):
     def __init__(self, parent):
         QWidget.__init__(self)
         self.Parent = parent
+
+        self.setStyleSheet(styles.mainStyle())
 
         self.tbIssue = IssuesTab(self)
         self.tbPeople = PeopleTab(self)

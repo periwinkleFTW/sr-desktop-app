@@ -39,6 +39,7 @@ class Main(QMainWindow):
             StatusMsg = 'Ready'
         self.StatBar.showMessage(StatusMsg)
 
+
 if __name__ == "__main__":
     MainEventThread = QApplication([])
 

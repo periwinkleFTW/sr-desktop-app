@@ -101,13 +101,13 @@ class PeopleTab(QWidget):
         self.peopleBottomRightLayout = QVBoxLayout()
         self.peopleBottomLeftLayout = QHBoxLayout()
         # Groupboxes allows customization using CSS-like syntax
-        self.peopleTopGroupBox = QGroupBox("Search Box")
+        self.peopleTopGroupBox = QGroupBox()
         self.peopleTopGroupBoxRightFiller = QGroupBox()
-        self.peopleMiddleGroupBox = QGroupBox("List Box")
+        self.peopleMiddleGroupBox = QGroupBox()
         self.peopleMiddleGroupBoxRightFiller = QGroupBox()
         self.peopleBottomGroupBox = QGroupBox()
-        self.peopleBottomLeftGroupBox = QGroupBox("People")
-        self.peopleBottomRightGroupBox = QGroupBox("Actions")
+        self.peopleBottomLeftGroupBox = QGroupBox()
+        self.peopleBottomRightGroupBox = QGroupBox()
         self.peopleBottomRightGroupBoxFiller = QGroupBox()
 
         # Top layout (search box) widgets
