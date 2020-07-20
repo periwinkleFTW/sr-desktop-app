@@ -49,7 +49,7 @@ class MyDatabase:
     def SetDatabase(self):
         filter  = "sql(*.sql)"
         caption = "Please Select a Valid Project Database"
-        path    = str(QSettings('CompanyName','ProjectName').value('LastProject'))
+        path    = str(QSettings('CompanyName', 'ProjectName').value('LastProject'))
         if len(path) > 0:
             path = osPath.dirname(path)
         else:
@@ -61,7 +61,7 @@ class MyDatabase:
             FindProj = QFileDialog()
             FindProj.setModal(True)
             FindProj.setFixedSize(self.size())
-            filePathName = FindProj.getOpenFileName(None, caption, path, filter )[0];
+            filePathName = FindProj.getOpenFileName(None, caption, path, filter)[0]
 
             # Is this a legitimate file
             if osPath.isfile(filePathName):

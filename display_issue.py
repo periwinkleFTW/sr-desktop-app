@@ -5,6 +5,8 @@ from PySide2.QtCore import Qt
 
 import backend
 
+import styles
+
 db = backend.Database("sr-data.db")
 
 
@@ -16,6 +18,8 @@ class DisplayIssue(QWidget):
         self.setGeometry(450, 150, 750, 650)
 
         self.Parent = parent
+
+        self.setStyleSheet(styles.mainStyle())
 
         self.UI()
         self.show()

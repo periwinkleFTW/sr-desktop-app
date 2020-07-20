@@ -5,9 +5,51 @@
 
 
 def mainStyle():
-    return '''
-    QTabWidget {
-    background-color: #ffffff;
+    return '''  
+    QTabWidget::pane {
+    background-color: #FFFFFF;
+    border: 0;
+    padding: 0;
+    }
+    
+    QTabWidget::tab-bar {
+    left: 20px; /* move to the right by 20px */
+    }
+    
+    QTabBar::tab:!selected {
+    margin: 4px; /* make non-selected tabs look smaller */
+    border: none;
+    padding: 1px;
+    background-color: #FFFFFF;
+    }
+    
+    QTabBar::tab {
+    font: 18px bold;
+    color: gray;
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,
+                                stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);
+    border-radius: 10px;
+    width: 14ex; /* Tab width */
+    height: 3ex;
+    min-width: 8ex;
+    padding: 1x;
+    margin: 3px;
+    }
+
+    QTabBar::tab:selected, QTabBar::tab:hover {
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #fafafa, stop: 0.4 #f4f4f4,
+                                stop: 0.5 #e7e7e7, stop: 1.0 #fafafa);
+    background-color: #EBF7FF;
+    padding: 2px;
+    }
+
+    QTabBar::tab:selected {
+    color: #438CDE;
+    background-color: #DAEBFF;
+    border-color: #C2C7CB; /* same as pane color */
+    border-radius: 10px;
     }
     
     QGroupBox {
@@ -20,13 +62,14 @@ def mainStyle():
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f6f7fa, stop: 1 #edf3f6);
     }
     
-    QPushButton {
+    QTableWidget {
     border: 1px solid gray;
-    border-radius: 5px;
-    width: 200px;
-    height: 30px;
-    font: 15px bold;
+    border-radius: 10px;
+    padding: 3px;
     }
+    
+    
+    
     '''
 
 def groupBoxFillerStyle():

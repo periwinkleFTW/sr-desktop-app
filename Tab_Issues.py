@@ -58,7 +58,11 @@ class IssuesTab(QWidget):
         # Bottom layout widget
         # Table showing issues
         self.issuesTable = QTableWidget()
+        self.issuesTable.verticalHeader().hide()
+        self.issuesTable.setSortingEnabled(True)
+        self.issuesTable.verticalHeader().setDefaultSectionSize(60)
         self.issuesTable.setColumnCount(16)
+
         # self.issuesTable.setColumnHidden(0, True)
         self.issuesTable.setHorizontalHeaderItem(0, QTableWidgetItem("ID"))
         self.issuesTable.setHorizontalHeaderItem(1, QTableWidgetItem("Date"))
@@ -154,7 +158,7 @@ class IssuesTab(QWidget):
         self.issuesBottomRightLayout.addWidget(self.exportIssuesXLSXBtn, 5)
         self.issuesBottomRightGroupBox.setLayout(self.issuesBottomRightLayout)
 
-        self.issuesMainBottomLayout.addWidget(self.issuesBottomLeftGroupBox, 90)
+        self.issuesMainBottomLayout.addWidget(self.issuesTable, 90)
         self.issuesMainBottomLayout.addWidget(self.issuesBottomRightGroupBox, 10)
 
         self.issuesMainLayout.addWidget(self.issuesTopGroupBox, 10)
