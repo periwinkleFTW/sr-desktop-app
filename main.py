@@ -26,7 +26,7 @@ class Main(QMainWindow):
         self.setWindowIcon(QIcon("assets/icons/logo-dark.png"))
         self.setGeometry(150, 150, 1470, 750)
 
-        self.setStyleSheet('QMainWindow{background-color: #FFFFFF;}')
+        self.setStyleSheet('QMainWindow{background-color: #F4F7F9;}')
 
         self.SmpRptDbase = Database("sr-data.db")
 

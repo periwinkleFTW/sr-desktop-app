@@ -7,7 +7,7 @@
 def mainStyle():
     return '''  
     QTabWidget::pane {
-    background-color: #FFFFFF;
+    background-color: #F4F7F9;
     border: 0;
     padding: 0;
     }
@@ -18,9 +18,10 @@ def mainStyle():
     
     QTabBar::tab:!selected {
     margin: 4px; /* make non-selected tabs look smaller */
-    border: none;
+    border: 1px;
+    border-color: #5E6770;
     padding: 1px;
-    background-color: #FFFFFF;
+    background-color: #F4F7F9;
     }
     
     QTabBar::tab {
@@ -43,12 +44,14 @@ def mainStyle():
                                 stop: 0.5 #e7e7e7, stop: 1.0 #fafafa);
     background-color: #EBF7FF;
     padding: 2px;
+    border: 1px;
+    border-color: #5E6770;
     }
 
     QTabBar::tab:selected {
     color: #438CDE;
     background-color: #DAEBFF;
-    border-color: #C2C7CB; /* same as pane color */
+    border-color: #5E6770; 
     border-radius: 10px;
     }
     
@@ -64,9 +67,24 @@ def mainStyle():
     
     QTableWidget {
     border: 1px solid gray;
-    border-radius: 10px;
-    padding: 3px;
+    padding: -2px;
+    background-color: white;
+    alternate-background-color: #FAFBFC;
     }
+    
+    QTableWidget::item {
+    border-style: none;
+    border-bottom: 1px solid gray;
+    }
+
+    QHeaderView::section {
+    border: 1px solid gray;
+    font: 15px;
+    background-color: #EDF1F5;
+    }
+
+    
+
     
     
     

@@ -1,7 +1,8 @@
 try:
     from PySide2.QtCore import Qt
     from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
-        QTableWidgetItem, QTableWidget, QGroupBox, QCheckBox, QAbstractItemView, QTableView, QMessageBox, QFileDialog
+        QTableWidgetItem, QTableWidget, QGroupBox, QCheckBox, QAbstractItemView, QTableView, QMessageBox, \
+        QFileDialog, QHeaderView
 except:
     from PyQt.QtCore import Qt
     from PyQt.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
@@ -60,26 +61,25 @@ class IssuesTab(QWidget):
         self.issuesTable = QTableWidget()
         self.issuesTable.verticalHeader().hide()
         self.issuesTable.setSortingEnabled(True)
+        self.issuesTable.setShowGrid(False)
         self.issuesTable.verticalHeader().setDefaultSectionSize(60)
-        self.issuesTable.setColumnCount(16)
+        self.issuesTable.setColumnCount(11)
 
         # self.issuesTable.setColumnHidden(0, True)
         self.issuesTable.setHorizontalHeaderItem(0, QTableWidgetItem("ID"))
         self.issuesTable.setHorizontalHeaderItem(1, QTableWidgetItem("Date"))
         self.issuesTable.setHorizontalHeaderItem(2, QTableWidgetItem("Priority"))
         self.issuesTable.setHorizontalHeaderItem(3, QTableWidgetItem("Observer"))
-        self.issuesTable.setHorizontalHeaderItem(4, QTableWidgetItem("Rev. Team"))
-        self.issuesTable.setHorizontalHeaderItem(5, QTableWidgetItem("Inspection name"))
-        self.issuesTable.setHorizontalHeaderItem(6, QTableWidgetItem("Theme"))
-        self.issuesTable.setHorizontalHeaderItem(7, QTableWidgetItem("Facility"))
-        self.issuesTable.setHorizontalHeaderItem(8, QTableWidgetItem("Facility Superv."))
-        self.issuesTable.setHorizontalHeaderItem(9, QTableWidgetItem("Spec. Loc."))
-        self.issuesTable.setHorizontalHeaderItem(10, QTableWidgetItem("Insp. Dept"))
-        self.issuesTable.setHorizontalHeaderItem(11, QTableWidgetItem("Insp. Contr."))
-        self.issuesTable.setHorizontalHeaderItem(12, QTableWidgetItem("Subcontr"))
-        self.issuesTable.setHorizontalHeaderItem(13, QTableWidgetItem("Deadline"))
-        self.issuesTable.setHorizontalHeaderItem(14, QTableWidgetItem("Status"))
-        self.issuesTable.setHorizontalHeaderItem(15, QTableWidgetItem("Created on"))
+        self.issuesTable.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.issuesTable.setHorizontalHeaderItem(4, QTableWidgetItem("Inspection name"))
+        self.issuesTable.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
+        self.issuesTable.setHorizontalHeaderItem(5, QTableWidgetItem("Theme"))
+        self.issuesTable.horizontalHeader().setSectionResizeMode(5, QHeaderView.Stretch)
+        self.issuesTable.setHorizontalHeaderItem(6, QTableWidgetItem("Facility"))
+        self.issuesTable.setHorizontalHeaderItem(7, QTableWidgetItem("Insp. Dept"))
+        self.issuesTable.setHorizontalHeaderItem(8, QTableWidgetItem("Deadline"))
+        self.issuesTable.setHorizontalHeaderItem(9, QTableWidgetItem("Status"))
+        self.issuesTable.setHorizontalHeaderItem(10, QTableWidgetItem("Created on"))
 
         # Double clicking a row opens a window with issue details
         self.issuesTable.doubleClicked.connect(self.funcSelectedIssue)
@@ -172,7 +172,9 @@ class IssuesTab(QWidget):
         for i in reversed(range(self.issuesTable.rowCount())):
             self.issuesTable.removeRow(i)
 
-        issues = db.cur.execute("SELECT * FROM issues")
+        issues = db.cur.execute("SELECT issue_id, issue_date, issue_priority, issue_observer,"
+                                "issue_inspection, issue_theme, issue_facility, issue_insp_dept,"
+                                "issue_deadline, status, created_on FROM issues")
 
         for row_data in issues:
             row_number = self.issuesTable.rowCount()

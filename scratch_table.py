@@ -75,11 +75,12 @@ stylesheet = """
         border-radius: 10px
     }
 
-    QTableWidget::item {
+    QTableWidget::item:first {
         color: #ff7777;                    
         background-color: #2222fd;
         margin-top: 5px;          
-        border-radius: 9px;
+        border-top-left-radius: 9px;
+        border-bottom-left-radius: 9px;
         padding-left: 5px;
     }
 
