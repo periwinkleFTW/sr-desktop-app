@@ -115,9 +115,9 @@ class AddIssue(QWidget):
         self.bottomLayout.addRow(QLabel("Deadline: "), self.deadlineEntry)
 
         self.bottomLayout.addRow(QLabel(""), self.attachFilesBtn)
-        self.bottomLayout.addRow(QLabel(""), self.addActionBtn)
+        # self.bottomLayout.addRow(QLabel(""), self.addActionBtn)
 
-        self.bottomLayout.addRow(QLabel(""), self.addRootCauseBtn)
+        # self.bottomLayout.addRow(QLabel(""), self.addRootCauseBtn)
         self.bottomLayout.addRow(QLabel(""), self.submitObservationBtn)
 
         self.bottomFrame.setLayout(self.bottomLayout)

@@ -13,13 +13,11 @@ def mainStyle():
     }
     
     QTabWidget::tab-bar {
-    left: 20px; /* move to the right by 20px */
+    left: 17px; /* move to the right by 20px */
     }
     
     QTabBar::tab:!selected {
     margin: 4px; /* make non-selected tabs look smaller */
-    border: 1px;
-    border-color: #5E6770;
     padding: 1px;
     background-color: #F4F7F9;
     }
@@ -30,7 +28,7 @@ def mainStyle():
     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                 stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,
                                 stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);
-    border-radius: 10px;
+    border-radius: 5px;
     width: 14ex; /* Tab width */
     height: 3ex;
     min-width: 8ex;
@@ -44,15 +42,14 @@ def mainStyle():
                                 stop: 0.5 #e7e7e7, stop: 1.0 #fafafa);
     background-color: #EBF7FF;
     padding: 2px;
-    border: 1px;
-    border-color: #5E6770;
+    border: 1px solid gray;
     }
 
     QTabBar::tab:selected {
     color: #438CDE;
     background-color: #DAEBFF;
-    border-color: #5E6770; 
-    border-radius: 10px;
+    border-color: #438CDE; 
+    border-radius: 5px;
     }
     
     QGroupBox {
@@ -60,6 +57,7 @@ def mainStyle():
     font: 15px Bold;
     color: white;
     border: 1px solid gray;
+    border-color: #8B97A3;
     border-radius: 5px;
     margin-top: 1ex;
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f6f7fa, stop: 1 #edf3f6);
@@ -79,14 +77,17 @@ def mainStyle():
 
     QHeaderView::section {
     border: 1px solid gray;
-    font: 15px;
+    font: 13px;
     background-color: #EDF1F5;
     }
 
-    
-
-    
-    
+    QPushButton#btn_addIssue {
+    border-image: url(assets/buttons/bright_green_btn.png) 3 10 3 10;
+    border-top: 3px transparent;
+    border-bottom: 3px transparent;
+    border-right: 10px transparent;
+    border-left: 10px transparent;
+    } 
     
     '''
 

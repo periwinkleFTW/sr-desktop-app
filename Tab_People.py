@@ -26,7 +26,7 @@ class PeopleTab(QWidget):
         QWidget.__init__(self)
         self.Parent = parent
 
-        self.PeoplTitle = 'People'
+        self.PeoplTitle = 'PEOPLE'
 
         self.UI()
 

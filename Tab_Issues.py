@@ -16,6 +16,7 @@ import sys
 from backend import Database
 from add_issue import AddIssue
 from display_issue import DisplayIssue
+from pdf_generator import PDF
 import styles
 
 db = Database("sr-data.db")
@@ -26,7 +27,7 @@ class IssuesTab(QWidget):
         QWidget.__init__(self)
         self.Parent = parent
 
-        self.IssueTitle = 'Issues'
+        self.IssueTitle = 'ISSUES'
 
         self.UI()
 
@@ -46,6 +47,7 @@ class IssuesTab(QWidget):
         self.searchIssuesEntry = QLineEdit()
         self.searchIssuesEntry.setPlaceholderText("Type here..")
         self.searchIssuesBtn = QPushButton("Search")
+        self.searchIssuesBtn.setObjectName("btn_searchIssues")
         self.searchIssuesBtn.clicked.connect(self.funcSearchIssues)
 
         # Middle layout (list issues) widgets with radio buttons
@@ -54,6 +56,7 @@ class IssuesTab(QWidget):
         self.lateIssuesRadioBtn = QRadioButton("Late issues")
         self.closedIssuesRadioBtn = QRadioButton("Closed issues")
         self.listIssuesBtn = QPushButton("List issues")
+        self.listIssuesBtn.setObjectName("btn_listIssues")
         self.listIssuesBtn.clicked.connect(self.funcListIssues)
 
         # Bottom layout widget
@@ -62,7 +65,7 @@ class IssuesTab(QWidget):
         self.issuesTable.verticalHeader().hide()
         self.issuesTable.setSortingEnabled(True)
         self.issuesTable.setShowGrid(False)
-        self.issuesTable.verticalHeader().setDefaultSectionSize(60)
+        self.issuesTable.verticalHeader().setDefaultSectionSize(40)
         self.issuesTable.setColumnCount(11)
 
         # self.issuesTable.setColumnHidden(0, True)
@@ -85,62 +88,77 @@ class IssuesTab(QWidget):
         self.issuesTable.doubleClicked.connect(self.funcSelectedIssue)
 
         # Buttons for actions on selected issues
-        self.refreshIssuesBtn = QPushButton("Refresh")
-        self.refreshIssuesBtn.clicked.connect(self.funcDisplayIssues)
         self.addIssue = QPushButton("Add issue")
+        self.addIssue.setObjectName("btn_addIssue")
         self.addIssue.clicked.connect(self.funcAddIssue)
         self.viewIssue = QPushButton("View/Edit issue")
+        self.viewIssue.setObjectName("btn_viewIssue")
         self.viewIssue.clicked.connect(self.funcSelectedIssue)
         self.closeIssueBtn = QPushButton("Close issue")
+        self.closeIssueBtn.setObjectName("btn_closeIssue")
         self.closeIssueBtn.clicked.connect(self.funcCloseIssue)
         self.deleteIssue = QPushButton("Delete issue")
+        self.deleteIssue.setObjectName("btn_deleteIssue")
         self.deleteIssue.clicked.connect(self.funcDeleteIssue)
         self.exportIssuesCSVBtn = QPushButton("Export CSV")
+        self.exportIssuesCSVBtn.setObjectName("btn_exportIssuesCSV")
         self.exportIssuesCSVBtn.clicked.connect(self.funcIssuesToCSV)
         self.exportIssuesXLSXBtn = QPushButton("Export XLSX")
+        self.exportIssuesXLSXBtn.setObjectName("btn_exportIssuesXLSX")
         self.exportIssuesXLSXBtn.clicked.connect(self.funcIssuestoXLSX)
+        self.exportIssuesPDFBtn = QPushButton("Export PDF")
+        self.exportIssuesPDFBtn.setObjectName("btn_exportIssuesPDF")
+        self.exportIssuesPDFBtn.clicked.connect(self.funcIssuesToPdf)
 
     def layouts(self):
         # Issues layouts ###########################################################
         self.issuesMainLayout = QVBoxLayout()
         self.issuesMainTopLayout = QHBoxLayout()
-        self.issuesMainMiddleLayout = QHBoxLayout()
+        self.issuesTopLeftLayout = QHBoxLayout()
+        self.issuesTopRightLayout = QHBoxLayout()
+        # self.issuesMainMiddleLayout = QHBoxLayout()
         self.issuesMainBottomLayout = QHBoxLayout()
         self.issuesBottomRightLayout = QVBoxLayout()
         self.issuesBottomLeftLayout = QHBoxLayout()
         # Groupboxes allow customization using CSS-like syntax
-        self.issuesTopGroupBox = QGroupBox()
-        self.issuesTopGroupBoxRightFiller = QGroupBox()
-        self.issuesTopGroupBoxRightFiller.setStyleSheet(styles.groupBoxFillerStyle())
+        # self.issuesTopGroupBox = QGroupBox()
+        # self.issuesTopGroupBoxRightFiller = QGroupBox()
+        # self.issuesTopGroupBoxRightFiller.setStyleSheet(styles.groupBoxFillerStyle())
+        #
+        # self.issuesMiddleGroupBox = QGroupBox()
+        # self.issuesMiddleGroupBoxRightFiller = QGroupBox()
+        # self.issuesMiddleGroupBoxRightFiller.setStyleSheet(styles.groupBoxFillerStyle())
 
-        self.issuesMiddleGroupBox = QGroupBox()
-        self.issuesMiddleGroupBoxRightFiller = QGroupBox()
-        self.issuesMiddleGroupBoxRightFiller.setStyleSheet(styles.groupBoxFillerStyle())
+        self.issuesTopLeftGroupBox = QGroupBox()
+        self.issuesTopRightGroupBox = QGroupBox()
+        self.issuesTopGroupBox = QGroupBox()
 
 
         self.issuesBottomGroupBox = QGroupBox()
         self.issuesBottomLeftGroupBox = QGroupBox()
 
         self.issuesBottomRightGroupBox = QGroupBox()
+        self.issuesBottomRightGroupBox.setStyleSheet('QGroupBox {margin-top: 0px;}')
         self.issuesBottomRightGroupBoxFiller = QGroupBox()
         self.issuesBottomRightGroupBoxFiller.setStyleSheet(styles.groupBoxFillerStyle())
 
         # Add widgets
         # Top layout (search box) widgets
-        self.issuesMainTopLayout.addWidget(self.searchIssuesText, 10)
-        self.issuesMainTopLayout.addWidget(self.searchIssuesEntry, 30)
-        self.issuesMainTopLayout.addWidget(self.searchIssuesBtn, 10)
-        self.issuesMainTopLayout.addWidget(self.issuesTopGroupBoxRightFiller, 50)
-        self.issuesTopGroupBox.setLayout(self.issuesMainTopLayout)
+        self.issuesTopLeftLayout.addWidget(self.searchIssuesText, 10)
+        self.issuesTopLeftLayout.addWidget(self.searchIssuesEntry, 30)
+        self.issuesTopLeftLayout.addWidget(self.searchIssuesBtn, 10)
+        self.issuesTopLeftGroupBox.setLayout(self.issuesTopLeftLayout)
 
         # Middle layout (list box) widgets
-        self.issuesMainMiddleLayout.addWidget(self.allIssuesRadioBtn)
-        self.issuesMainMiddleLayout.addWidget(self.ongoingIssuesRadioBtn)
-        self.issuesMainMiddleLayout.addWidget(self.lateIssuesRadioBtn)
-        self.issuesMainMiddleLayout.addWidget(self.closedIssuesRadioBtn)
-        self.issuesMainMiddleLayout.addWidget(self.listIssuesBtn)
-        self.issuesMainMiddleLayout.addWidget(self.issuesMiddleGroupBoxRightFiller, 65)
-        self.issuesMiddleGroupBox.setLayout(self.issuesMainMiddleLayout)
+        self.issuesTopRightLayout.addWidget(self.allIssuesRadioBtn)
+        self.issuesTopRightLayout.addWidget(self.ongoingIssuesRadioBtn)
+        self.issuesTopRightLayout.addWidget(self.lateIssuesRadioBtn)
+        self.issuesTopRightLayout.addWidget(self.closedIssuesRadioBtn)
+        self.issuesTopRightLayout.addWidget(self.listIssuesBtn)
+        self.issuesTopRightGroupBox.setLayout(self.issuesTopRightLayout)
+
+        self.issuesMainTopLayout.addWidget(self.issuesTopLeftGroupBox)
+        self.issuesMainTopLayout.addWidget(self.issuesTopRightGroupBox)
 
         # Bottom layout (table with facilities) widgets
         # Bottom left layout with table
@@ -148,7 +166,6 @@ class IssuesTab(QWidget):
         self.issuesBottomLeftGroupBox.setLayout(self.issuesBottomLeftLayout)
 
         # Bottom right layout with buttons
-        self.issuesBottomRightLayout.addWidget(self.refreshIssuesBtn, 5)
         self.issuesBottomRightLayout.addWidget(self.addIssue, 5)
         self.issuesBottomRightLayout.addWidget(self.viewIssue, 5)
         self.issuesBottomRightLayout.addWidget(self.closeIssueBtn, 5)
@@ -156,13 +173,13 @@ class IssuesTab(QWidget):
         self.issuesBottomRightLayout.addWidget(self.issuesBottomRightGroupBoxFiller, 65)
         self.issuesBottomRightLayout.addWidget(self.exportIssuesCSVBtn, 5)
         self.issuesBottomRightLayout.addWidget(self.exportIssuesXLSXBtn, 5)
+        self.issuesBottomRightLayout.addWidget(self.exportIssuesPDFBtn, 5)
         self.issuesBottomRightGroupBox.setLayout(self.issuesBottomRightLayout)
 
         self.issuesMainBottomLayout.addWidget(self.issuesTable, 90)
         self.issuesMainBottomLayout.addWidget(self.issuesBottomRightGroupBox, 10)
 
-        self.issuesMainLayout.addWidget(self.issuesTopGroupBox, 10)
-        self.issuesMainLayout.addWidget(self.issuesMiddleGroupBox, 10)
+        self.issuesMainLayout.addLayout(self.issuesMainTopLayout, 10)
         self.issuesMainLayout.addLayout(self.issuesMainBottomLayout, 80)
 
         self.setLayout(self.issuesMainLayout)
@@ -188,7 +205,7 @@ class IssuesTab(QWidget):
             qhboxlayout.setAlignment(Qt.AlignRight)
             qhboxlayout.setContentsMargins(0, 0, 20, 0)
             self.issuesTable.setCellWidget(row_number, 0, qwidget)
-            self.issuesTable.setItem(row_number, 1, QTableWidgetItem(str(row_number)))
+            self.issuesTable.setItem(row_number, 0, QTableWidgetItem(str(row_number)))
 
             for column_number, data in enumerate(row_data):
                 if column_number == 0:
@@ -428,7 +445,7 @@ class IssuesTab(QWidget):
                         worksheet.write(0, col, value[0])
                         col += 1
 
-                    # Write date to xlsx file
+                    # Write data to xlsx file
                     row_number = 1
                     for index in range(len(indices)):
                         query = "SELECT * FROM issues WHERE issue_id=?"
@@ -445,3 +462,78 @@ class IssuesTab(QWidget):
         else:
             QMessageBox.information(
                 self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")
+
+    def funcIssuesToPdf(self):
+        indices = self.funcIssuesCheckBox()
+        date = datetime.datetime.now()
+
+
+        if indices:
+            try:
+                # Get file location and add timestamp to when it was created to the filename
+                fileName, _ = QFileDialog.getSaveFileName(
+                    self, "Save as...", "~/exportIssPDF" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".pdf",
+                    "PDF files (*.pdf)")
+
+                if fileName:
+                    pdf = PDF()
+                    pdf.add_page()
+                    pdf.set_font('Arial', 'B', 13)
+
+                    for index in range(len(indices)):
+                        query = "SELECT * FROM issues WHERE issue_id=?"
+                        issue_record = db.cur.execute(query, (indices[index],)).fetchone()
+
+                        # This string allows for text formatting in the pdf, easy to implement and test
+                        stringIssue = "\nIssue id: " + str(issue_record[0]) + "\nissue_date: "  + str(issue_record[1]) +\
+                        "\nissue_priority: "  + str(issue_record[2]) +  "\nissue_observer: "  + str(issue_record[3]) +\
+                        "\nissue_team: "  + str(issue_record[4]) +  "\nissue_inspection: " + str(issue_record[5]) + \
+                        "\nissue_theme: " + str(issue_record[6]) + "\nissue_facility: " + str(issue_record[7]) +\
+                        "\nissue_fac_supervisor: " + str(issue_record[8]) + "\nissue_spec_loc: " + str(issue_record[9]) +\
+                        "\nissue_insp_dept: " + str(issue_record[10]) + "\nissue_insp_contr: " + str(issue_record[11]) +\
+                        "\nissue_insp_subcontr: " + str(issue_record[12]) + "\nissue_deadline: " + str(issue_record[13]) + \
+                        "\nstatus: " + str(issue_record[14]) + "\ncreated_on: " + str(issue_record[15]) +\
+                        "\nclosed_on: "  + str(issue_record[16])
+
+                        pdf.multi_cell(200, 10, stringIssue)
+                    pdf.output(fileName, 'F')
+
+                    QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
+
+            except:
+                QMessageBox.information(self, "Info", "Export failed")
+
+
+        else:
+            row = self.issuesTable.currentRow()
+            issueId = self.issuesTable.item(row, 0).text()
+            issueId = issueId.lstrip("ISS#")
+
+            try:
+                # Get file location and add timestamp to when it was created to the filename
+                fileName, _ = QFileDialog.getSaveFileName(
+                    self, "Save as...", "~/IssuesPDF" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".pdf",
+                    "PDF files (*.pdf)")
+                if fileName:
+                    query = "SELECT * FROM issues WHERE issue_id=?"
+                    issue_record = db.cur.execute(query, (issueId,)).fetchone()
+
+                    pdf = PDF()
+                    pdf.add_page()
+                    pdf.set_font('Arial', 'B', 13)
+
+                    stringIssue = "\nIssue id: " + str(issue_record[0]) + "\nissue_date: "  + str(issue_record[1]) +\
+                    "\nissue_priority: "  + str(issue_record[2]) +  "\nissue_observer: "  + str(issue_record[3]) +\
+                    "\nissue_team: "  + str(issue_record[4]) +  "\nissue_inspection: " + str(issue_record[5]) + \
+                    "\nissue_theme: " + str(issue_record[6]) + "\nissue_facility: " + str(issue_record[7]) +\
+                    "\nissue_fac_supervisor: " + str(issue_record[8]) + "\nissue_spec_loc: " + str(issue_record[9]) +\
+                    "\nissue_insp_dept: " + str(issue_record[10]) + "\nissue_insp_contr: " + str(issue_record[11]) +\
+                    "\nissue_insp_subcontr: " + str(issue_record[12]) + "\nissue_deadline: " + str(issue_record[13]) + \
+                    "\nstatus: " + str(issue_record[14]) + "\ncreated_on: " + str(issue_record[15]) +\
+                    "\nclosed_on: "  + str(issue_record[16])
+                    pdf.multi_cell(200, 10, stringIssue)
+                    pdf.output(fileName, 'F')
+
+                QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
+            except:
+                QMessageBox.information(self, "Info", "Export failed")

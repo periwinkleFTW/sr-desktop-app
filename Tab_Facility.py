@@ -26,7 +26,7 @@ class FacilityTab(QWidget):
         QWidget.__init__(self)
         self.Parent = parent
 
-        self.FcltyTitle = 'Facilities'
+        self.FcltyTitle = 'FACILITIES'
 
         self.UI()
 
