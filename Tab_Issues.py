@@ -401,7 +401,7 @@ class IssuesTab(QWidget):
 
                 # Get file location and add timestamp to when it was created to the filename
                 fileName, _ = QFileDialog.getSaveFileName(
-                    self, "Save as...", "~/exportIssCSV" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".csv",
+                    self, "Save as...", "~/IssuesCSV" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".csv",
                     "CSV files (*.csv)")
                 if fileName:
                     with open(fileName, "w") as csv_file:
@@ -431,7 +431,7 @@ class IssuesTab(QWidget):
 
                 # Get file location and add timestamp to when it was created to the filename
                 fileName, _ = QFileDialog.getSaveFileName(
-                    self, "Save as...", "~/exportIssXLSX" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".xlsx",
+                    self, "Save as...", "~/IssuesXLSX" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".xlsx",
                     "Excel files (*.xlsx)")
                 if fileName:
                     db.cur.execute("SELECT * FROM issues")
@@ -465,14 +465,14 @@ class IssuesTab(QWidget):
 
     def funcIssuesToPdf(self):
         indices = self.funcIssuesCheckBox()
-        date = datetime.datetime.now()
-
 
         if indices:
             try:
+                date = datetime.datetime.now()
+
                 # Get file location and add timestamp to when it was created to the filename
                 fileName, _ = QFileDialog.getSaveFileName(
-                    self, "Save as...", "~/exportIssPDF" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".pdf",
+                    self, "Save as...", "~/IssuesPDF" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".pdf",
                     "PDF files (*.pdf)")
 
                 if fileName:
@@ -502,38 +502,6 @@ class IssuesTab(QWidget):
 
             except:
                 QMessageBox.information(self, "Info", "Export failed")
-
-
         else:
-            row = self.issuesTable.currentRow()
-            issueId = self.issuesTable.item(row, 0).text()
-            issueId = issueId.lstrip("ISS#")
-
-            try:
-                # Get file location and add timestamp to when it was created to the filename
-                fileName, _ = QFileDialog.getSaveFileName(
-                    self, "Save as...", "~/IssuesPDF" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".pdf",
-                    "PDF files (*.pdf)")
-                if fileName:
-                    query = "SELECT * FROM issues WHERE issue_id=?"
-                    issue_record = db.cur.execute(query, (issueId,)).fetchone()
-
-                    pdf = PDF()
-                    pdf.add_page()
-                    pdf.set_font('Arial', 'B', 13)
-
-                    stringIssue = "\nIssue id: " + str(issue_record[0]) + "\nissue_date: "  + str(issue_record[1]) +\
-                    "\nissue_priority: "  + str(issue_record[2]) +  "\nissue_observer: "  + str(issue_record[3]) +\
-                    "\nissue_team: "  + str(issue_record[4]) +  "\nissue_inspection: " + str(issue_record[5]) + \
-                    "\nissue_theme: " + str(issue_record[6]) + "\nissue_facility: " + str(issue_record[7]) +\
-                    "\nissue_fac_supervisor: " + str(issue_record[8]) + "\nissue_spec_loc: " + str(issue_record[9]) +\
-                    "\nissue_insp_dept: " + str(issue_record[10]) + "\nissue_insp_contr: " + str(issue_record[11]) +\
-                    "\nissue_insp_subcontr: " + str(issue_record[12]) + "\nissue_deadline: " + str(issue_record[13]) + \
-                    "\nstatus: " + str(issue_record[14]) + "\ncreated_on: " + str(issue_record[15]) +\
-                    "\nclosed_on: "  + str(issue_record[16])
-                    pdf.multi_cell(200, 10, stringIssue)
-                    pdf.output(fileName, 'F')
-
-                QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
-            except:
-                QMessageBox.information(self, "Info", "Export failed")
+            QMessageBox.information(
+                self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")

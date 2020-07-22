@@ -18,6 +18,7 @@ import xlsxwriter
 from backend import Database
 from add_person import AddPerson
 from display_person import DisplayPerson
+from pdf_generator import PDF
 
 db = Database("sr-data.db")
 
@@ -90,6 +91,8 @@ class PeopleTab(QWidget):
         self.exportPeopleCSVBtn.clicked.connect(self.funcPeopleToCSV)
         self.exportPeopleXLSXBtn = QPushButton("Export XLSX")
         self.exportPeopleXLSXBtn.clicked.connect(self.funcPeopleToXLSX)
+        self.exportPeoplePDFBtn = QPushButton("Export PDF")
+        self.exportPeoplePDFBtn.clicked.connect(self.funcPeopleToPdf)
 
 
     def layouts(self):
@@ -136,9 +139,10 @@ class PeopleTab(QWidget):
         self.peopleBottomRightLayout.addWidget(self.addPerson, 5)
         self.peopleBottomRightLayout.addWidget(self.viewPerson, 5)
         self.peopleBottomRightLayout.addWidget(self.deletePerson, 5)
-        self.peopleBottomRightLayout.addWidget(self.peopleBottomRightGroupBoxFiller, 70)
+        self.peopleBottomRightLayout.addWidget(self.peopleBottomRightGroupBoxFiller, 65)
         self.peopleBottomRightLayout.addWidget(self.exportPeopleCSVBtn, 5)
         self.peopleBottomRightLayout.addWidget(self.exportPeopleXLSXBtn, 5)
+        self.peopleBottomRightLayout.addWidget(self.exportPeoplePDFBtn, 5)
         self.peopleBottomRightGroupBox.setLayout(self.peopleBottomRightLayout)
 
         self.peopleMainBottomLayout.addWidget(self.peopleBottomLeftGroupBox, 90)
@@ -319,7 +323,7 @@ class PeopleTab(QWidget):
 
                 # Get file location and add timestamp to when it was created to the filename
                 fileName, _ = QFileDialog.getSaveFileName(
-                    self, "Save as...", "~/exportPplCSV" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".csv",
+                    self, "Save as...", "~/PeopleCSV" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".csv",
                     "CSV files (*.csv)")
                 if fileName:
                     with open(fileName, "w") as csv_file:
@@ -350,7 +354,7 @@ class PeopleTab(QWidget):
 
                 # Get file location and add timestamp to when it was created to the filename
                 fileName, _ = QFileDialog.getSaveFileName(
-                    self, "Save as...", "~/exportPrnXLSX" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".xlsx",
+                    self, "Save as...", "~/PeopleXLSX" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".xlsx",
                     "Excel files (*.xlsx)")
                 if fileName:
                     db.cur.execute("SELECT * FROM people")
@@ -374,6 +378,47 @@ class PeopleTab(QWidget):
                         row_number += 1
 
                     workbook.close()
+
+                    QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
+
+            except:
+                QMessageBox.information(self, "Info", "Export failed")
+        else:
+            QMessageBox.information(
+                self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")
+
+    def funcPeopleToPdf(self):
+        indices = self.funcPeopleCheckBox()
+
+        if indices:
+            try:
+                date = datetime.datetime.now()
+
+                # Get file location and add timestamp to when it was created to the filename
+                fileName, _ = QFileDialog.getSaveFileName(
+                    self, "Save as...", "~/PeoplePDF" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".pdf",
+                    "PDF files (*.pdf)")
+
+                if fileName:
+                    pdf = PDF()
+                    pdf.add_page()
+                    pdf.set_font('Arial', 'B', 13)
+
+                    for index in range(len(indices)):
+                        query = "SELECT * FROM people WHERE person_id=?"
+                        person_record = db.cur.execute(query, (indices[index],)).fetchone()
+
+                        # This string allows for text formatting in the pdf, easy to implement and test
+                        stringPerson = "\nPerson id: " + str(person_record[0]) + "\nFirst name: " + str(person_record[1]) + \
+                                      "\nLast name: " + str(person_record[2]) + "\nTitle: " + str(
+                            person_record[3]) + \
+                                      "\nPhone: " + str(person_record[4]) + "\nEmail: " + str(
+                            person_record[5]) + \
+                                      "\nLocation: " + str(person_record[6]) + "\nEmployment type: " + str(
+                            person_record[7])
+
+                        pdf.multi_cell(200, 10, stringPerson)
+                    pdf.output(fileName, 'F')
 
                     QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
 

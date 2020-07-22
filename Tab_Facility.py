@@ -18,6 +18,7 @@ import datetime
 from backend import Database
 from add_facility import AddFacility
 from display_facility import DisplayFacility
+from pdf_generator import PDF
 
 db = Database("sr-data.db")
 
@@ -89,6 +90,8 @@ class FacilityTab(QWidget):
         self.exportFacilitiesCSVBtn.clicked.connect(self.funcFacilitiesToCSV)
         self.exportFacilitiesXSLXBtn = QPushButton("Export XLSX")
         self.exportFacilitiesXSLXBtn.clicked.connect(self.funcFacilitiesToXLSX)
+        self.exportFacilitiesPDFBtn = QPushButton("Export PDF")
+        self.exportFacilitiesPDFBtn.clicked.connect(self.funcFacilitiesToPdf)
 
 
     def layouts(self):
@@ -134,9 +137,10 @@ class FacilityTab(QWidget):
         self.facilitiesBottomRightLayout.addWidget(self.addFacility, 5)
         self.facilitiesBottomRightLayout.addWidget(self.viewFacility, 5)
         self.facilitiesBottomRightLayout.addWidget(self.deleteFacility, 5)
-        self.facilitiesBottomRightLayout.addWidget(self.facilitiesBottomRightGroupBoxFiller, 70)
+        self.facilitiesBottomRightLayout.addWidget(self.facilitiesBottomRightGroupBoxFiller, 65)
         self.facilitiesBottomRightLayout.addWidget(self.exportFacilitiesCSVBtn, 5)
         self.facilitiesBottomRightLayout.addWidget(self.exportFacilitiesXSLXBtn, 5)
+        self.facilitiesBottomRightLayout.addWidget(self.exportFacilitiesPDFBtn, 5)
         self.facilitiesBottomRightGroupBox.setLayout(self.facilitiesBottomRightLayout)
 
         self.facilitiesMainBottomLayout.addWidget(self.facilitiesBottomLeftGroupBox, 90)
@@ -273,7 +277,7 @@ class FacilityTab(QWidget):
 
                 # Get file location and add timestamp to when it was created to the filename
                 fileName, _ = QFileDialog.getSaveFileName(
-                    self, "Save as...", "~/exportFclCSV" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".csv",
+                    self, "Save as...", "~/FacilitiesCSV" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".csv",
                     "CSV files (*.csv)")
                 if fileName:
                     with open(fileName, "w") as csv_file:
@@ -303,7 +307,7 @@ class FacilityTab(QWidget):
 
                 # Get file location and add timestamp to when it was created to the filename
                 fileName, _ = QFileDialog.getSaveFileName(
-                    self, "Save as...", "~/exportFclXLSX" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".xlsx",
+                    self, "Save as...", "~/FacilitiesXLSX" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".xlsx",
                     "Excel files (*.xlsx)")
                 if fileName:
                     db.cur.execute("SELECT * FROM facilities")
@@ -336,3 +340,42 @@ class FacilityTab(QWidget):
             QMessageBox.information(
                 self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")
 
+
+    def funcFacilitiesToPdf(self):
+        indices = self.funcFacilitiesCheckBox()
+
+        if indices:
+            try:
+                date = datetime.datetime.now()
+
+                # Get file location and add timestamp to when it was created to the filename
+                fileName, _ = QFileDialog.getSaveFileName(
+                    self, "Save as...", "~/FacilitiesPDF" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".pdf",
+                    "PDF files (*.pdf)")
+
+                if fileName:
+                    pdf = PDF()
+                    pdf.add_page()
+                    pdf.set_font('Arial', 'B', 13)
+
+                    for index in range(len(indices)):
+                        query = "SELECT * FROM facilities WHERE facility_id=?"
+                        facility_record = db.cur.execute(query, (indices[index],)).fetchone()
+
+                        # This string allows for text formatting in the pdf, easy to implement and test
+                        stringFacility = "\nFacility id: " + str(facility_record[0]) + "\nFacility name: " + str(facility_record[1]) + \
+                                      "\nLocation: " + str(facility_record[2]) + "\nPhone: " + str(
+                            facility_record[3]) + \
+                                      "\nEmail: " + str(facility_record[4]) + "\nSupervisor: " + str(
+                            facility_record[5])
+
+                        pdf.multi_cell(200, 10, stringFacility)
+                    pdf.output(fileName, 'F')
+
+                    QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
+
+            except:
+                QMessageBox.information(self, "Info", "Export failed")
+        else:
+            QMessageBox.information(
+                self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")
