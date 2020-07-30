@@ -20,6 +20,7 @@ def mainStyle():
     margin: 4px; /* make non-selected tabs look smaller */
     padding: 1px;
     background-color: #F4F7F9;
+    border: 1px solid gray;
     }
     
     QTabBar::tab {
@@ -80,14 +81,6 @@ def mainStyle():
     font: 13px;
     background-color: #EDF1F5;
     }
-
-    QPushButton#btn_addIssue {
-    border-image: url(assets/buttons/bright_green_btn.png) 3 10 3 10;
-    border-top: 3px transparent;
-    border-bottom: 3px transparent;
-    border-right: 10px transparent;
-    border-left: 10px transparent;
-    } 
     
     '''
 
@@ -96,6 +89,30 @@ def groupBoxFillerStyle():
     QGroupBox {
     border: none;
     background: none;
+    }
+    '''
+
+def addPopups():
+    return '''
+    QWidget#add_issue_popup {
+    background-color: #F4F7F9;
+    }
+    
+    QWidget#add_person_popup {
+    background-color: #F4F7F9;
+    }
+    
+    QWidget#add_facility_popup {
+    background-color: #F4F7F9;
+    }
+    
+    QScrollArea > QWidget > QWidget {
+    border: none;
+    background-color: #F4F7F9;
+    }
+    
+    QWidget > QScrollArea {
+    background-color: transparent;
     }
     '''
 

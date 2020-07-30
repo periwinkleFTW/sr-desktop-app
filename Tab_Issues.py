@@ -133,10 +133,8 @@ class IssuesTab(QWidget):
         self.issuesTopRightGroupBox = QGroupBox()
         self.issuesTopGroupBox = QGroupBox()
 
-
         self.issuesBottomGroupBox = QGroupBox()
         self.issuesBottomLeftGroupBox = QGroupBox()
-
         self.issuesBottomRightGroupBox = QGroupBox()
         self.issuesBottomRightGroupBox.setStyleSheet('QGroupBox {margin-top: 0px;}')
         self.issuesBottomRightGroupBoxFiller = QGroupBox()
@@ -149,7 +147,7 @@ class IssuesTab(QWidget):
         self.issuesTopLeftLayout.addWidget(self.searchIssuesBtn, 10)
         self.issuesTopLeftGroupBox.setLayout(self.issuesTopLeftLayout)
 
-        # Middle layout (list box) widgets
+        # layout (list box) widgets
         self.issuesTopRightLayout.addWidget(self.allIssuesRadioBtn)
         self.issuesTopRightLayout.addWidget(self.ongoingIssuesRadioBtn)
         self.issuesTopRightLayout.addWidget(self.lateIssuesRadioBtn)
@@ -180,7 +178,7 @@ class IssuesTab(QWidget):
         self.issuesMainBottomLayout.addWidget(self.issuesBottomRightGroupBox, 10)
 
         self.issuesMainLayout.addLayout(self.issuesMainTopLayout, 10)
-        self.issuesMainLayout.addLayout(self.issuesMainBottomLayout, 80)
+        self.issuesMainLayout.addLayout(self.issuesMainBottomLayout, 90)
 
         self.setLayout(self.issuesMainLayout)
 
@@ -218,6 +216,8 @@ class IssuesTab(QWidget):
 
     def funcAddIssue(self):
         self.newIssue = AddIssue(self)
+        self.newIssue.setObjectName("add_issue_popup")
+        self.newIssue.setStyleSheet(styles.addPopups())
 
     def funcIssuesCheckBox(self):
         checked_list = []

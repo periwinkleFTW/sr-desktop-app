@@ -15,6 +15,7 @@ except ImportError:
 import csv
 import xlsxwriter
 import datetime
+import styles
 from backend import Database
 from add_facility import AddFacility
 from display_facility import DisplayFacility
@@ -57,6 +58,10 @@ class FacilityTab(QWidget):
 
         # Bottom layout widget, a table showing people
         self.facilitiesTable = QTableWidget()
+        self.facilitiesTable.verticalHeader().hide()
+        self.facilitiesTable.setSortingEnabled(True)
+        self.facilitiesTable.setShowGrid(False)
+        self.facilitiesTable.verticalHeader().setDefaultSectionSize(40)
         self.facilitiesTable.setColumnCount(10)
         # self.peopleTable.setColumnHidden(0, True)
         self.facilitiesTable.setHorizontalHeaderItem(0, QTableWidgetItem("ID"))
@@ -78,8 +83,6 @@ class FacilityTab(QWidget):
         self.facilitiesTable.doubleClicked.connect(self.funcSelectedFacility)
 
         # Buttons for actions on selected facilities
-        self.refreshFacilitiesBtn = QPushButton("Refresh")
-        self.refreshFacilitiesBtn.clicked.connect(self.funcDisplayFacilities)
         self.addFacility = QPushButton("Add facility")
         self.addFacility.clicked.connect(self.funcAddFacility)
         self.viewFacility = QPushButton("View/Edit facility")
@@ -98,34 +101,42 @@ class FacilityTab(QWidget):
         # Facilities layouts ###########################################################
         self.facilitiesMainLayout = QVBoxLayout()
         self.facilitiesMainTopLayout = QHBoxLayout()
-        self.facilitiesMainMiddleLayout = QHBoxLayout()
+        self.facilitiesTopLeftLayout = QHBoxLayout()
+        self.facilitiesTopRightLayout = QHBoxLayout()
+
         self.facilitiesMainBottomLayout = QHBoxLayout()
         self.facilitiesBottomRightLayout = QVBoxLayout()
         self.facilitiesBottomLeftLayout = QHBoxLayout()
+
         # Groupboxes allows customization using CSS-like syntax
-        self.facilitiesTopGroupBox = QGroupBox("Search Box")
-        self.facilitiesTopGroupBoxRightFiller = QGroupBox()
-        self.facilitiesMiddleGroupBox = QGroupBox("List Box")
-        self.facilitiesMiddleGroupBoxRightFiller = QGroupBox()
+
+        self.facilitiesTopLeftGroupBox = QGroupBox()
+        self.facilitiesTopRightGroupBox = QGroupBox()
+        self.facilitiesTopGroupBox = QGroupBox()
+
+
         self.facilitiesBottomGroupBox = QGroupBox()
-        self.facilitiesBottomLeftGroupBox = QGroupBox("Facilities")
-        self.facilitiesBottomRightGroupBox = QGroupBox("Actions")
+        self.facilitiesBottomLeftGroupBox = QGroupBox()
+        self.facilitiesBottomRightGroupBox = QGroupBox()
+        self.facilitiesBottomRightGroupBox.setStyleSheet('QGroupBox {margin-top: 0px;}')
         self.facilitiesBottomRightGroupBoxFiller = QGroupBox()
+        self.facilitiesBottomRightGroupBoxFiller.setStyleSheet(styles.groupBoxFillerStyle())
 
         # Top layout (search box) widgets
-        self.facilitiesMainTopLayout.addWidget(self.searchFacilitiesText, 10)
-        self.facilitiesMainTopLayout.addWidget(self.searchFacilitesEntry, 30)
-        self.facilitiesMainTopLayout.addWidget(self.searchFacilitiesBtn, 10)
-        self.facilitiesMainTopLayout.addWidget(self.facilitiesTopGroupBoxRightFiller, 50)
-        self.facilitiesTopGroupBox.setLayout(self.facilitiesMainTopLayout)
+        self.facilitiesTopLeftLayout.addWidget(self.searchFacilitiesText, 10)
+        self.facilitiesTopLeftLayout.addWidget(self.searchFacilitesEntry, 30)
+        self.facilitiesTopLeftLayout.addWidget(self.searchFacilitiesBtn, 10)
+        self.facilitiesTopLeftGroupBox.setLayout(self.facilitiesTopLeftLayout)
 
-        # Middle layout (list box) widgets
-        self.facilitiesMainMiddleLayout.addWidget(self.allFacilitiesRadioBtn)
-        self.facilitiesMainMiddleLayout.addWidget(self.withOngoingIssuesFacilitiesRadioBtn)
-        self.facilitiesMainMiddleLayout.addWidget(self.withLateIssuesRadioBtn)
-        self.facilitiesMainMiddleLayout.addWidget(self.listFacilitiesBtn)
-        self.facilitiesMainMiddleLayout.addWidget(self.facilitiesMiddleGroupBoxRightFiller, 65)
-        self.facilitiesMiddleGroupBox.setLayout(self.facilitiesMainMiddleLayout)
+        # layout (list box) widgets
+        self.facilitiesTopRightLayout.addWidget(self.allFacilitiesRadioBtn)
+        self.facilitiesTopRightLayout.addWidget(self.withOngoingIssuesFacilitiesRadioBtn)
+        self.facilitiesTopRightLayout.addWidget(self.withLateIssuesRadioBtn)
+        self.facilitiesTopRightLayout.addWidget(self.listFacilitiesBtn)
+        self.facilitiesTopRightGroupBox.setLayout(self.facilitiesTopRightLayout)
+
+        self.facilitiesMainTopLayout.addWidget(self.facilitiesTopLeftGroupBox)
+        self.facilitiesMainTopLayout.addWidget(self.facilitiesTopRightGroupBox)
 
         # Bottom layout (table with facilities) widgets
         # Bottom left layout with table
@@ -133,28 +144,28 @@ class FacilityTab(QWidget):
         self.facilitiesBottomLeftGroupBox.setLayout(self.facilitiesBottomLeftLayout)
 
         # Bottom right layout with buttons
-        self.facilitiesBottomRightLayout.addWidget(self.refreshFacilitiesBtn, 5)
         self.facilitiesBottomRightLayout.addWidget(self.addFacility, 5)
         self.facilitiesBottomRightLayout.addWidget(self.viewFacility, 5)
         self.facilitiesBottomRightLayout.addWidget(self.deleteFacility, 5)
-        self.facilitiesBottomRightLayout.addWidget(self.facilitiesBottomRightGroupBoxFiller, 65)
+        self.facilitiesBottomRightLayout.addWidget(self.facilitiesBottomRightGroupBoxFiller, 70)
         self.facilitiesBottomRightLayout.addWidget(self.exportFacilitiesCSVBtn, 5)
         self.facilitiesBottomRightLayout.addWidget(self.exportFacilitiesXSLXBtn, 5)
         self.facilitiesBottomRightLayout.addWidget(self.exportFacilitiesPDFBtn, 5)
         self.facilitiesBottomRightGroupBox.setLayout(self.facilitiesBottomRightLayout)
 
-        self.facilitiesMainBottomLayout.addWidget(self.facilitiesBottomLeftGroupBox, 90)
+        self.facilitiesMainBottomLayout.addWidget(self.facilitiesTable, 90)
         self.facilitiesMainBottomLayout.addWidget(self.facilitiesBottomRightGroupBox, 10)
 
-        self.facilitiesMainLayout.addWidget(self.facilitiesTopGroupBox, 10)
-        self.facilitiesMainLayout.addWidget(self.facilitiesMiddleGroupBox, 10)
-        self.facilitiesMainLayout.addLayout(self.facilitiesMainBottomLayout, 80)
+        self.facilitiesMainLayout.addLayout(self.facilitiesMainTopLayout, 10)
+        self.facilitiesMainLayout.addLayout(self.facilitiesMainBottomLayout, 90)
 
         self.setLayout(self.facilitiesMainLayout)
 
 
     def funcAddFacility(self):
         self.newFacility = AddFacility(self)
+        self.newFacility.setObjectName("add_facility_popup")
+        self.newFacility.setStyleSheet(styles.addPopups())
 
 
     def funcDisplayFacilities(self):

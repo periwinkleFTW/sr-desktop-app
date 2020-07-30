@@ -13,6 +13,7 @@ except:
 import csv
 import datetime
 import xlsxwriter
+import styles
 
 
 from backend import Database
@@ -59,6 +60,10 @@ class PeopleTab(QWidget):
 
         # Bottom layout widget, a table showing people
         self.peopleTable = QTableWidget()
+        self.peopleTable.verticalHeader().hide()
+        self.peopleTable.setSortingEnabled(True)
+        self.peopleTable.setShowGrid(False)
+        self.peopleTable.verticalHeader().setDefaultSectionSize(40)
         self.peopleTable.setColumnCount(8)
         # self.peopleTable.setColumnHidden(0, True)
         self.peopleTable.setHorizontalHeaderItem(0, QTableWidgetItem("ID"))
@@ -74,13 +79,12 @@ class PeopleTab(QWidget):
         self.peopleTable.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
         self.peopleTable.setHorizontalHeaderItem(6, QTableWidgetItem("Location"))
         self.peopleTable.setHorizontalHeaderItem(7, QTableWidgetItem("Employment type"))
+        self.peopleTable.horizontalHeader().setSectionResizeMode(7, QHeaderView.Stretch)
 
         # Double clicking a row opens a window with person details
         self.peopleTable.doubleClicked.connect(self.selectedPerson)
 
         # Buttons for actions on selected people
-        self.refreshPeopleBtn = QPushButton("Refresh")
-        self.refreshPeopleBtn.clicked.connect(self.funcDisplayPeople)
         self.addPerson = QPushButton("Add person")
         self.addPerson.clicked.connect(self.funcAddPerson)
         self.viewPerson = QPushButton("View/Edit person")
@@ -99,35 +103,48 @@ class PeopleTab(QWidget):
         # People layouts ###########################################################
         self.peopleMainLayout = QVBoxLayout()
         self.peopleMainTopLayout = QHBoxLayout()
-        self.peopleMainMiddleLayout = QHBoxLayout()
+        self.peopleTopLeftLayout = QHBoxLayout()
+        self.peopleTopRightLayout = QHBoxLayout()
+
+        # self.peopleMainMiddleLayout = QHBoxLayout()
         self.peopleMainBottomLayout = QHBoxLayout()
         self.peopleBottomRightLayout = QVBoxLayout()
         self.peopleBottomLeftLayout = QHBoxLayout()
+        
         # Groupboxes allows customization using CSS-like syntax
+        # self.peopleTopGroupBox = QGroupBox()
+        # self.peopleTopGroupBoxRightFiller = QGroupBox()
+        # self.peopleMiddleGroupBox = QGroupBox()
+        # self.peopleMiddleGroupBoxRightFiller = QGroupBox()
+
+        self.peopleTopLeftGroupBox = QGroupBox()
+        self.peopleTopRightGroupBox = QGroupBox()
         self.peopleTopGroupBox = QGroupBox()
-        self.peopleTopGroupBoxRightFiller = QGroupBox()
-        self.peopleMiddleGroupBox = QGroupBox()
-        self.peopleMiddleGroupBoxRightFiller = QGroupBox()
+
         self.peopleBottomGroupBox = QGroupBox()
         self.peopleBottomLeftGroupBox = QGroupBox()
+
         self.peopleBottomRightGroupBox = QGroupBox()
+        self.peopleBottomRightGroupBox.setStyleSheet('QGroupBox {margin-top: 0px;}')
         self.peopleBottomRightGroupBoxFiller = QGroupBox()
+        self.peopleBottomRightGroupBoxFiller.setStyleSheet(styles.groupBoxFillerStyle())
 
         # Top layout (search box) widgets
-        self.peopleMainTopLayout.addWidget(self.searchPeopleText, 10)
-        self.peopleMainTopLayout.addWidget(self.searchPeopleEntry, 30)
-        self.peopleMainTopLayout.addWidget(self.searchPeopleBtn, 10)
-        self.peopleMainTopLayout.addWidget(self.peopleTopGroupBoxRightFiller, 50)
-        self.peopleTopGroupBox.setLayout(self.peopleMainTopLayout)
+        self.peopleTopLeftLayout.addWidget(self.searchPeopleText, 10)
+        self.peopleTopLeftLayout.addWidget(self.searchPeopleEntry, 30)
+        self.peopleTopLeftLayout.addWidget(self.searchPeopleBtn, 10)
+        self.peopleTopLeftGroupBox.setLayout(self.peopleTopLeftLayout)
 
         # Middle layout (list box) widgets
-        self.peopleMainMiddleLayout.addWidget(self.allPeopleRadioBtn)
-        self.peopleMainMiddleLayout.addWidget(self.employeesPeopleRadioBtn)
-        self.peopleMainMiddleLayout.addWidget(self.contractorsPeopleRadioBtn)
-        self.peopleMainMiddleLayout.addWidget(self.subcontractorsPeopleRadioBtn)
-        self.peopleMainMiddleLayout.addWidget(self.listPeopleBtn)
-        self.peopleMainMiddleLayout.addWidget(self.peopleMiddleGroupBoxRightFiller, 65)
-        self.peopleMiddleGroupBox.setLayout(self.peopleMainMiddleLayout)
+        self.peopleTopRightLayout.addWidget(self.allPeopleRadioBtn)
+        self.peopleTopRightLayout.addWidget(self.employeesPeopleRadioBtn)
+        self.peopleTopRightLayout.addWidget(self.contractorsPeopleRadioBtn)
+        self.peopleTopRightLayout.addWidget(self.subcontractorsPeopleRadioBtn)
+        self.peopleTopRightLayout.addWidget(self.listPeopleBtn)
+        self.peopleTopRightGroupBox.setLayout(self.peopleTopRightLayout)
+
+        self.peopleMainTopLayout.addWidget(self.peopleTopLeftGroupBox)
+        self.peopleMainTopLayout.addWidget(self.peopleTopRightGroupBox)
 
         # Bottom layout (table with issues) widgets
         # Bottom left layout with table
@@ -135,22 +152,24 @@ class PeopleTab(QWidget):
         self.peopleBottomLeftGroupBox.setLayout(self.peopleBottomLeftLayout)
 
         # Bottom right layout with buttons
-        self.peopleBottomRightLayout.addWidget(self.refreshPeopleBtn, 5)
         self.peopleBottomRightLayout.addWidget(self.addPerson, 5)
         self.peopleBottomRightLayout.addWidget(self.viewPerson, 5)
         self.peopleBottomRightLayout.addWidget(self.deletePerson, 5)
-        self.peopleBottomRightLayout.addWidget(self.peopleBottomRightGroupBoxFiller, 65)
+        self.peopleBottomRightLayout.addWidget(self.peopleBottomRightGroupBoxFiller, 70)
         self.peopleBottomRightLayout.addWidget(self.exportPeopleCSVBtn, 5)
         self.peopleBottomRightLayout.addWidget(self.exportPeopleXLSXBtn, 5)
         self.peopleBottomRightLayout.addWidget(self.exportPeoplePDFBtn, 5)
         self.peopleBottomRightGroupBox.setLayout(self.peopleBottomRightLayout)
 
-        self.peopleMainBottomLayout.addWidget(self.peopleBottomLeftGroupBox, 90)
+        self.peopleMainBottomLayout.addWidget(self.peopleTable, 90)
         self.peopleMainBottomLayout.addWidget(self.peopleBottomRightGroupBox, 10)
 
-        self.peopleMainLayout.addWidget(self.peopleTopGroupBox, 10)
-        self.peopleMainLayout.addWidget(self.peopleMiddleGroupBox, 10)
-        self.peopleMainLayout.addLayout(self.peopleMainBottomLayout, 80)
+        # self.peopleMainLayout.addWidget(self.peopleTopGroupBox, 10)
+        # self.peopleMainLayout.addWidget(self.peopleMiddleGroupBox, 10)
+        # self.peopleMainLayout.addLayout(self.peopleMainBottomLayout, 80)
+
+        self.peopleMainLayout.addLayout(self.peopleMainTopLayout, 10)
+        self.peopleMainLayout.addLayout(self.peopleMainBottomLayout, 90)
 
         self.setLayout(self.peopleMainLayout)
 
@@ -188,6 +207,8 @@ class PeopleTab(QWidget):
     # DONE
     def funcAddPerson(self):
         self.newPerson = AddPerson(self)
+        self.newPerson.setObjectName("add_person_popup")
+        self.newPerson.setStyleSheet(styles.addPopups())
 
     def funcPeopleCheckBox(self):
         checked_list = []

@@ -1,10 +1,14 @@
 
-from PySide2.QtWidgets import QWidget, QScrollArea, QLabel, QDateTimeEdit, QComboBox, QTextEdit, \
-    QPushButton, QVBoxLayout, QHBoxLayout, QFormLayout, QFrame, QMessageBox
-from PySide2.QtGui import QIcon, QPixmap, Qt
+import os
+import random
+import string
+from os import path as osPath
+from shutil import copy2 as ShCopy2
+
 from PySide2.QtCore import QDateTime
-
-
+from PySide2.QtGui import QIcon, QPixmap, Qt
+from PySide2.QtWidgets import QWidget, QScrollArea, QLabel, QDateTimeEdit, QComboBox, QTextEdit, \
+    QPushButton, QVBoxLayout, QHBoxLayout, QFormLayout, QFrame, QMessageBox, QFileDialog
 from backend import Database
 
 db = Database("sr-data.db")
@@ -39,10 +43,11 @@ class AddIssue(QWidget):
         self.addIssueImg.setPixmap(self.img)
         self.addIssueImg.setAlignment(Qt.AlignCenter)
         self.titleText = QLabel("Add issue")
+        self.titleText.setObjectName("add_issue_title")
         self.titleText.setAlignment(Qt.AlignCenter)
         # Middle layout widgets
-        self.issueInfoTitleText = QLabel("Issue info")
-        self.issueInfoTitleText.setAlignment(Qt.AlignCenter)
+        # self.issueInfoTitleText = QLabel("Issue info")
+        # self.issueInfoTitleText.setAlignment(Qt.AlignCenter)
         self.dateEntry = QDateTimeEdit()
         self.dateEntry.setDateTime(QDateTime.currentDateTime())
         self.priorityEntry = QComboBox()
@@ -71,6 +76,7 @@ class AddIssue(QWidget):
 
         # Bottom layout widgets
         self.attachFilesBtn = QPushButton("Attach files")
+        self.attachFilesBtn.clicked.connect(self.funcAttachFiles)
         self.addActionBtn = QPushButton("Add action")
 
         self.rootCauseEntry = QComboBox()
@@ -83,6 +89,9 @@ class AddIssue(QWidget):
         self.submitObservationBtn = QPushButton("Add issue")
         self.submitObservationBtn.clicked.connect(self.addIssue)
 
+        self.cancelBtn = QPushButton("Cancel")
+        self.cancelBtn.clicked.connect(self.closeWindow)
+
     def layouts(self):
         self.mainLayout = QVBoxLayout()
         self.topLayout = QHBoxLayout()
@@ -93,13 +102,13 @@ class AddIssue(QWidget):
         self.bottomFrame = QFrame()
 
         # Add widgets to top layout
-        self.topLayout.addWidget(self.addIssueImg)
+        # self.topLayout.addWidget(self.addIssueImg)
         self.topLayout.addWidget(self.titleText)
 
         self.topFrame.setLayout(self.topLayout)
 
         # Add widgets to middle layout
-        self.bottomLayout.addRow(self.issueInfoTitleText)
+        # self.bottomLayout.addRow(self.issueInfoTitleText)
         self.bottomLayout.addRow(QLabel("Inspection Date: "), self.dateEntry)
         self.bottomLayout.addRow(QLabel("Priority: "), self.priorityEntry)
         self.bottomLayout.addRow(QLabel("Observer: "), self.observerEntry)
@@ -130,6 +139,9 @@ class AddIssue(QWidget):
         self.mainLayout.addWidget(self.scroll)
 
         self.setLayout(self.mainLayout)
+
+    def closeWindow(self):
+        self.close()
 
     def addIssue(self):
         date = self.dateEntry.text()
@@ -166,6 +178,7 @@ class AddIssue(QWidget):
                 db.conn.commit()
 
                 QMessageBox.information(self, "Info", "Issue has been added")
+
                 self.Parent.funcDisplayIssues()
 
                 self.close()
@@ -175,3 +188,29 @@ class AddIssue(QWidget):
             QMessageBox.information(self, "Info", "Fields cannot be empty")
 
 
+
+    # Need to figure out how attach files to items in db
+    def funcAttachFiles(self):
+        # Check if the default directory for media exists, if not create one
+
+        # if not os.path.isdir("./assets/media/issues-media"):
+        #     os.makedirs("./assets/media/issues-media")
+        # else:
+        #     QMessageBox.information(self, "Info", "Cannot create media directory!")
+
+
+        filePathName = QFileDialog.getOpenFileName(self, "Attach file...", "/", "Image files (*.jpg, *.jpeg, *.png)")[0]
+
+        if osPath.isfile(filePathName):
+            fileName, fileExt = osPath.splitext(filePathName)
+
+            if fileExt == '.jpg' or fileExt == '.jpeg' or fileExt == '.png':
+                randomSuffix = "".join(random.choice(string.ascii_lowercase) for i in range(6))
+                newFilePath = ShCopy2(fileName+fileExt, "./assets/media/issues-media/"+randomSuffix+fileExt)
+
+                return newFilePath
+
+            else:
+                QMessageBox.information(self, "Info", "Wrong file type!")
+        else:
+            QMessageBox.information(self, "Info", "Something went wrong. Try again...")

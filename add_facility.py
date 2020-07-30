@@ -16,7 +16,7 @@ class AddFacility(QWidget):
         QWidget.__init__(self)
         self.setWindowTitle("Add facility")
         self.setWindowIcon(QIcon("assets/icons/icon.ico"))
-        self.setGeometry(450, 150, 750, 650)
+        self.setGeometry(450, 150, 400, 250)
         #self.setFixedSize(self.size())
 
         self.Parent = parent
@@ -35,6 +35,7 @@ class AddFacility(QWidget):
         self.addFacilityImg.setPixmap(self.img)
         self.addFacilityImg.setAlignment(Qt.AlignCenter)
         self.titleText = QLabel("Add facility")
+        self.titleText.setObjectName("add_fcl_title")
         self.titleText.setAlignment(Qt.AlignCenter)
         # Bottom layout widgets
         self.facilityInfoTitleText = QLabel("Facility info")
@@ -61,7 +62,7 @@ class AddFacility(QWidget):
         self.bottomFrame = QFrame()
 
         # Add widgets to top layout
-        self.topLayout.addWidget(self.addFacilityImg)
+        # self.topLayout.addWidget(self.addFacilityImg)
         self.topLayout.addWidget(self.titleText)
 
         self.topFrame.setLayout(self.topLayout)

@@ -16,7 +16,7 @@ class AddPerson(QWidget):
         QWidget.__init__(self)
         self.setWindowTitle("Add person")
         self.setWindowIcon(QIcon("assets/icons/icon.ico"))
-        self.setGeometry(450, 150, 750, 650)
+        self.setGeometry(450, 150, 400, 250)
         #self.setFixedSize(self.size())
 
         self.Parent = parent
@@ -66,7 +66,7 @@ class AddPerson(QWidget):
         self.bottomFrame = QFrame()
 
         # Add widgets to top layout
-        self.topLayout.addWidget(self.addPersonImg)
+        # self.topLayout.addWidget(self.addPersonImg)
         self.topLayout.addWidget(self.titleText)
 
         self.topFrame.setLayout(self.topLayout)
