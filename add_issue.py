@@ -2,6 +2,7 @@
 import os
 import random
 import string
+from datetime import datetime
 from os import path as osPath
 from shutil import copy2 as ShCopy2
 
@@ -177,6 +178,11 @@ class AddIssue(QWidget):
                                        inspectedSubcontr, deadline, now))
                 db.conn.commit()
 
+                if self.filePathName != "":
+                    self.newFilePath = ShCopy2(self.filePathName, self.attachedFilePath)
+                else:
+                    pass
+
                 QMessageBox.information(self, "Info", "Issue has been added")
 
                 self.Parent.funcDisplayIssues()
@@ -199,16 +205,17 @@ class AddIssue(QWidget):
         #     QMessageBox.information(self, "Info", "Cannot create media directory!")
 
 
-        filePathName = QFileDialog.getOpenFileName(self, "Attach file...", "/", "Image files (*.jpg, *.jpeg, *.png)")[0]
+        self.filePathName = QFileDialog.getOpenFileName(self, "Attach file...", "/", "Image files (*.jpg, *.jpeg, *.png)")[0]
 
-        if osPath.isfile(filePathName):
-            fileName, fileExt = osPath.splitext(filePathName)
+        if osPath.isfile(self.filePathName):
+            fileName, fileExt = osPath.splitext(self.filePathName)
 
             if fileExt == '.jpg' or fileExt == '.jpeg' or fileExt == '.png':
-                randomSuffix = "".join(random.choice(string.ascii_lowercase) for i in range(6))
-                newFilePath = ShCopy2(fileName+fileExt, "./assets/media/issues-media/"+randomSuffix+fileExt)
+                date = datetime.now()
+                randomSuffix = "".join(random.choice(string.ascii_lowercase) for i in range(15))
+                self.attachedFilePath = "./assets/media/issues-media/" + "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix+fileExt
 
-                return newFilePath
+                QMessageBox.information(self, "Info", "File attached successfully")
 
             else:
                 QMessageBox.information(self, "Info", "Wrong file type!")
