@@ -1,5 +1,5 @@
 try:
-    from PySide2.QtCore import Qt
+    from PySide2.QtCore import Qt, Slot
     from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
         QTableWidgetItem, QTableWidget, QGroupBox, QCheckBox, QAbstractItemView, QTableView, QMessageBox, \
         QFileDialog, QHeaderView
@@ -183,6 +183,7 @@ class IssuesTab(QWidget):
         self.setLayout(self.issuesMainLayout)
 
     # Populating the table
+    @Slot()
     def funcDisplayIssues(self):
         for i in reversed(range(self.issuesTable.rowCount())):
             self.issuesTable.removeRow(i)
@@ -214,11 +215,13 @@ class IssuesTab(QWidget):
         self.issuesTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.issuesTable.setSelectionBehavior(QTableView.SelectRows)
 
+    @Slot()
     def funcAddIssue(self):
         self.newIssue = AddIssue(self)
         self.newIssue.setObjectName("add_issue_popup")
         self.newIssue.setStyleSheet(styles.addPopups())
 
+    @Slot()
     def funcIssuesCheckBox(self):
         checked_list = []
         for i in range(self.issuesTable.rowCount()):
@@ -227,9 +230,11 @@ class IssuesTab(QWidget):
                 checked_list.append(item.lstrip("ISS#"))
         return checked_list
 
+    @Slot()
     def funcSelectedIssue(self):
         self.displayIssue = DisplayIssue(self)
 
+    @Slot()
     def funcSearchIssues(self):
         value = self.searchIssuesEntry.text()
         if value == "":
@@ -270,6 +275,7 @@ class IssuesTab(QWidget):
                     for column_number, data in enumerate(row_data):
                         self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
 
+    @Slot()
     def funcListIssues(self):
         if self.allIssuesRadioBtn.isChecked():
             self.funcDisplayIssues()
@@ -311,6 +317,7 @@ class IssuesTab(QWidget):
                 for column_number, data in enumerate(row_data):
                     self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
 
+    @Slot()
     def funcCloseIssue(self):
         indices = self.funcIssuesCheckBox()
         # Close issues with selected checkboxes
@@ -356,6 +363,7 @@ class IssuesTab(QWidget):
             except:
                 QMessageBox.information(self, "Info", "Something went wrong")
 
+    @Slot()
     def funcDeleteIssue(self):
         indices = self.funcIssuesCheckBox()
 
@@ -392,6 +400,7 @@ class IssuesTab(QWidget):
 
             self.displayIssue.close()
 
+    @Slot()
     def funcIssuesToCSV(self):
         indices = self.funcIssuesCheckBox()
         # Check if there are any selected items
@@ -422,6 +431,7 @@ class IssuesTab(QWidget):
             QMessageBox.information(
                 self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")
 
+    @Slot()
     def funcIssuestoXLSX(self):
         indices = self.funcIssuesCheckBox()
 
@@ -463,6 +473,7 @@ class IssuesTab(QWidget):
             QMessageBox.information(
                 self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")
 
+    @Slot()
     def funcIssuesToPdf(self):
         indices = self.funcIssuesCheckBox()
 

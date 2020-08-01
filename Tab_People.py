@@ -3,7 +3,7 @@ try:
     from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
         QTableWidgetItem, QTableWidget, QGroupBox, QHeaderView, QAbstractItemView, QTableView, QCheckBox, \
         QMessageBox, QFileDialog
-    from PySide2.QtCore import Qt
+    from PySide2.QtCore import Qt, Slot
 except:
     from PyQt.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
         QTableWidgetItem, QTableWidget, QGroupBox, QHeaderView, QAbstractItemView, QTableView, QCheckBox, \
@@ -173,7 +173,7 @@ class PeopleTab(QWidget):
 
         self.setLayout(self.peopleMainLayout)
 
-    # DONE
+    @Slot()
     def funcDisplayPeople(self):
         for i in reversed(range(self.peopleTable.rowCount())):
             self.peopleTable.removeRow(i)
@@ -204,12 +204,13 @@ class PeopleTab(QWidget):
         self.peopleTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.peopleTable.setSelectionBehavior(QTableView.SelectRows)
 
-    # DONE
+    @Slot()
     def funcAddPerson(self):
         self.newPerson = AddPerson(self)
         self.newPerson.setObjectName("add_person_popup")
         self.newPerson.setStyleSheet(styles.addPopups())
 
+    @Slot()
     def funcPeopleCheckBox(self):
         checked_list = []
         for i in range(self.peopleTable.rowCount()):
@@ -218,12 +219,12 @@ class PeopleTab(QWidget):
                 checked_list.append(item.lstrip("PRN#"))
         return checked_list
 
-    # DONE
+    @Slot()
     def selectedPerson(self):
         self.displayPerson = DisplayPerson(self)
         self.displayPerson.show()
 
-    # TODO make it work with check boxes
+    @Slot()
     def funcDeletePerson(self):
         indices = self.funcPeopleCheckBox()
 
@@ -260,7 +261,7 @@ class PeopleTab(QWidget):
 
         self.displayPerson.close()
 
-    # DONE
+    @Slot()
     def funcListPeople(self):
         if self.allPeopleRadioBtn.isChecked():
             self.funcDisplayPeople()
@@ -301,7 +302,7 @@ class PeopleTab(QWidget):
                 for column_number, data in enumerate(row_data):
                     self.peopleTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
 
-    # DONE
+    @Slot()
     def searchPeople(self):
         value = self.searchPeopleEntry.text()
         if value == "":
@@ -334,7 +335,8 @@ class PeopleTab(QWidget):
                     self.peopleTable.insertRow(row_number)
                     for column_number, data in enumerate(row_data):
                         self.peopleTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
-    # DONE
+
+    @Slot()
     def funcPeopleToCSV(self):
         indices = self.funcPeopleCheckBox()
         # Check if there are any selected items
@@ -365,7 +367,7 @@ class PeopleTab(QWidget):
             QMessageBox.information(
                 self, "Info", "Nothing selected for export\nUse checkboxes to select people to export")
 
-    # DONE
+    @Slot()
     def funcPeopleToXLSX(self):
         indices = self.funcPeopleCheckBox()
 
@@ -408,6 +410,7 @@ class PeopleTab(QWidget):
             QMessageBox.information(
                 self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")
 
+    @Slot()
     def funcPeopleToPdf(self):
         indices = self.funcPeopleCheckBox()
 

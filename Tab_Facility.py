@@ -3,7 +3,7 @@ try:
    from PySide2.QtWidgets import QRadioButton, QHBoxLayout, QVBoxLayout
    from PySide2.QtWidgets import QTableWidgetItem, QTableWidget, QGroupBox, QMessageBox
    from PySide2.QtWidgets import QHeaderView, QTableView, QAbstractItemView, QCheckBox, QFileDialog
-   from PySide2.QtCore import Qt
+   from PySide2.QtCore import Qt, Slot
 
 except ImportError:
    from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton
@@ -161,13 +161,13 @@ class FacilityTab(QWidget):
 
         self.setLayout(self.facilitiesMainLayout)
 
-
+    @Slot()
     def funcAddFacility(self):
         self.newFacility = AddFacility(self)
         self.newFacility.setObjectName("add_facility_popup")
         self.newFacility.setStyleSheet(styles.addPopups())
 
-
+    @Slot()
     def funcDisplayFacilities(self):
         for i in reversed(range(self.facilitiesTable.rowCount())):
             self.facilitiesTable.removeRow(i)
@@ -198,6 +198,7 @@ class FacilityTab(QWidget):
         self.facilitiesTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.facilitiesTable.setSelectionBehavior(QTableView.SelectRows)
 
+    @Slot()
     def funcFacilitiesCheckBox(self):
         checked_list = []
         for i in range(self.facilitiesTable.rowCount()):
@@ -206,12 +207,12 @@ class FacilityTab(QWidget):
                 checked_list.append(item.lstrip("FCL#"))
         return checked_list
 
-
+    @Slot()
     def funcSelectedFacility(self):
         self.displayFacility = DisplayFacility(self)
         self.displayFacility.show()
 
-
+    @Slot()
     def funcDeleteFacility(self):
         indices = self.funcFacilitiesCheckBox()
 
@@ -247,7 +248,7 @@ class FacilityTab(QWidget):
                     QMessageBox.information(self, "Info", "No changes made")
         self.displayFacility.close()
 
-
+    @Slot()
     def funcSearchFacilities(self):
         value = self.searchFacilitesEntry.text()
         if value == "":
@@ -278,7 +279,7 @@ class FacilityTab(QWidget):
                     for column_number, data in enumerate(row_data):
                         self.facilitiesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
 
-
+    @Slot()
     def funcFacilitiesToCSV(self):
         indices = self.funcFacilitiesCheckBox()
         # Check if there are any selected items
@@ -309,6 +310,7 @@ class FacilityTab(QWidget):
             QMessageBox.information(
                 self, "Info", "Nothing selected for export\nUse checkboxes to select facilities to export")
 
+    @Slot()
     def funcFacilitiesToXLSX(self):
         indices = self.funcFacilitiesCheckBox()
 
@@ -351,7 +353,7 @@ class FacilityTab(QWidget):
             QMessageBox.information(
                 self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")
 
-
+    @Slot()
     def funcFacilitiesToPdf(self):
         indices = self.funcFacilitiesCheckBox()
 

@@ -98,12 +98,33 @@ def addPopups():
     background-color: #F4F7F9;
     }
     
+    QWidget > QLabel#add_issue_title_txt {
+    border: 1px solid gray; 
+    padding-top: 30px; 
+    padding-bottom: 30px; 
+    border-radius: 5; font: 16px;
+    }
+    
     QWidget#add_person_popup {
     background-color: #F4F7F9;
     }
     
+    QWidget > QLabel#add_person_title_txt {
+    border: 1px solid gray; 
+    padding-top: 30px; 
+    padding-bottom: 30px; 
+    border-radius: 5; font: 16px;
+    }
+    
     QWidget#add_facility_popup {
     background-color: #F4F7F9;
+    }
+    
+    QWidget > QLabel#add_fcl_title_txt {
+    border: 1px solid gray; 
+    padding-top: 30px; 
+    padding-bottom: 30px; 
+    border-radius: 5; font: 16px;
     }
     
     QScrollArea > QWidget > QWidget {

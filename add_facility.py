@@ -1,8 +1,8 @@
 
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QFrame, QFormLayout, QMessageBox
+    QFrame, QFormLayout, QMessageBox, QSpacerItem, QSizePolicy
 from PySide2.QtGui import QPixmap, QIcon
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, Slot
 
 
 import backend
@@ -34,8 +34,8 @@ class AddFacility(QWidget):
         self.img = QPixmap('assets/icons/add-facility.png')
         self.addFacilityImg.setPixmap(self.img)
         self.addFacilityImg.setAlignment(Qt.AlignCenter)
-        self.titleText = QLabel("Add facility")
-        self.titleText.setObjectName("add_fcl_title")
+        self.titleText = QLabel("ADD FACILITY")
+        self.titleText.setObjectName("add_fcl_title_txt")
         self.titleText.setAlignment(Qt.AlignCenter)
         # Bottom layout widgets
         self.facilityInfoTitleText = QLabel("Facility info")
@@ -52,11 +52,17 @@ class AddFacility(QWidget):
         self.addFacilityBtn = QPushButton("Add facility")
         self.addFacilityBtn.clicked.connect(self.addFacility)
 
+        self.cancelBtn = QPushButton("Cancel")
+        self.cancelBtn.clicked.connect(self.closeWindow)
+
 
     def layouts(self):
         self.mainLayout = QVBoxLayout()
         self.topLayout = QHBoxLayout()
         self.bottomLayout = QFormLayout()
+        self.bottomLayout.setVerticalSpacing(20)
+        self.bottomBtnLayout = QHBoxLayout()
+
         # Put elements into frames for visual distinction
         self.topFrame = QFrame()
         self.bottomFrame = QFrame()
@@ -75,7 +81,14 @@ class AddFacility(QWidget):
         self.bottomLayout.addRow(QLabel("Email: "), self.facilityEmailEntry)
         self.bottomLayout.addRow(QLabel("Facility supervisor: "), self.facilitySupervisorEntry)
         self.bottomLayout.addRow(QLabel(""), self.attachPhotoBtn)
-        self.bottomLayout.addRow(QLabel(""), self.addFacilityBtn)
+
+        self.bottomBtnLayout.addWidget(self.cancelBtn)
+        self.bottomBtnLayout.addItem(QSpacerItem(200, 5, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.bottomBtnLayout.addWidget(self.addFacilityBtn)
+
+        self.bottomBtnLayout.setAlignment(Qt.AlignBottom)
+
+        self.bottomLayout.addRow(self.bottomBtnLayout)
 
         self.bottomFrame.setLayout(self.bottomLayout)
 
@@ -85,15 +98,17 @@ class AddFacility(QWidget):
 
         self.setLayout(self.mainLayout)
 
+    @Slot()
+    def closeWindow(self):
+        self.close()
 
+    @Slot()
     def addFacility(self):
         name = self.facilityNameEntry.text()
         location = self.facilityLocationEntry.text()
         phone = self.facilityPhoneEntry.text()
         email = self.facilityEmailEntry.text()
         supervisor = self.facilitySupervisorEntry.text()
-
-
 
         if (name and location and phone and email and supervisor != ""):
             try:

@@ -1,15 +1,13 @@
-
-import os
 import random
 import string
 from datetime import datetime
 from os import path as osPath
 from shutil import copy2 as ShCopy2
 
-from PySide2.QtCore import QDateTime
+from PySide2.QtCore import QDateTime, Slot
 from PySide2.QtGui import QIcon, QPixmap, Qt
 from PySide2.QtWidgets import QWidget, QScrollArea, QLabel, QDateTimeEdit, QComboBox, QTextEdit, \
-    QPushButton, QVBoxLayout, QHBoxLayout, QFormLayout, QFrame, QMessageBox, QFileDialog
+    QPushButton, QVBoxLayout, QHBoxLayout, QFormLayout, QFrame, QMessageBox, QFileDialog, QSpacerItem, QSizePolicy
 from backend import Database
 
 db = Database("sr-data.db")
@@ -22,7 +20,7 @@ class AddIssue(QWidget):
         QWidget.__init__(self)
         self.setWindowTitle("Add issue")
         self.setWindowIcon(QIcon("assets/icons/icon.ico"))
-        self.setGeometry(450, 150, 750, 950)
+        self.setGeometry(450, 150, 550, 850)
         # self.setFixedSize(self.size())
 
         self.Parent = parent
@@ -43,12 +41,10 @@ class AddIssue(QWidget):
         self.img = QPixmap('assets/icons/create-issue.png')
         self.addIssueImg.setPixmap(self.img)
         self.addIssueImg.setAlignment(Qt.AlignCenter)
-        self.titleText = QLabel("Add issue")
-        self.titleText.setObjectName("add_issue_title")
+        self.titleText = QLabel("ADD ISSUE")
+        self.titleText.setObjectName("add_issue_title_txt")
         self.titleText.setAlignment(Qt.AlignCenter)
         # Middle layout widgets
-        # self.issueInfoTitleText = QLabel("Issue info")
-        # self.issueInfoTitleText.setAlignment(Qt.AlignCenter)
         self.dateEntry = QDateTimeEdit()
         self.dateEntry.setDateTime(QDateTime.currentDateTime())
         self.priorityEntry = QComboBox()
@@ -97,6 +93,8 @@ class AddIssue(QWidget):
         self.mainLayout = QVBoxLayout()
         self.topLayout = QHBoxLayout()
         self.bottomLayout = QFormLayout()
+        self.bottomLayout.setVerticalSpacing(20)
+        self.bottomBtnLayout = QHBoxLayout()
 
         # Put elements into frames for visual distinction
         self.topFrame = QFrame()
@@ -123,12 +121,20 @@ class AddIssue(QWidget):
         self.bottomLayout.addRow(QLabel("Inspected contractor: "), self.inspectedContractorEntry)
         self.bottomLayout.addRow(QLabel("Inspected subcontractor: "), self.inspectedSubcontractorEntry)
         self.bottomLayout.addRow(QLabel("Deadline: "), self.deadlineEntry)
-
         self.bottomLayout.addRow(QLabel(""), self.attachFilesBtn)
         # self.bottomLayout.addRow(QLabel(""), self.addActionBtn)
 
         # self.bottomLayout.addRow(QLabel(""), self.addRootCauseBtn)
-        self.bottomLayout.addRow(QLabel(""), self.submitObservationBtn)
+        # self.bottomLayout.addRow(QLabel(""), self.submitObservationBtn)
+
+        self.bottomBtnLayout.addWidget(self.cancelBtn)
+        self.bottomBtnLayout.addItem(QSpacerItem(200, 5, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.bottomBtnLayout.addWidget(self.submitObservationBtn)
+
+        self.bottomBtnLayout.setAlignment(Qt.AlignBottom)
+
+        self.bottomLayout.addRow(self.bottomBtnLayout)
+
 
         self.bottomFrame.setLayout(self.bottomLayout)
 
@@ -141,10 +147,16 @@ class AddIssue(QWidget):
 
         self.setLayout(self.mainLayout)
 
+    @Slot()
     def closeWindow(self):
         self.close()
 
+    @Slot()
     def addIssue(self):
+        # If user selected a file to attach, rename the file and copy it to media folder
+        if self.filePathName != "":
+            self.newFilePath = ShCopy2(self.filePathName, self.attachedFilePath)
+
         date = self.dateEntry.text()
         priority = self.priorityEntry.currentText()
         observer = self.observerEntry.currentText()
@@ -159,7 +171,7 @@ class AddIssue(QWidget):
         inspectedSubcontr = self.inspectedSubcontractorEntry.currentText()
         deadline = self.deadlineEntry.text()
 
-        if date and priority and observer and revisionTeam and inspectionName and observationTheme and facility\
+        if date and priority and observer and revisionTeam and inspectionName and observationTheme and facility \
                 and facilitySupervisor and specificLocation and inspectedDept and inspectedContr \
                 and inspectedSubcontr and deadline != "":
             try:
@@ -178,11 +190,6 @@ class AddIssue(QWidget):
                                        inspectedSubcontr, deadline, now))
                 db.conn.commit()
 
-                if self.filePathName != "":
-                    self.newFilePath = ShCopy2(self.filePathName, self.attachedFilePath)
-                else:
-                    pass
-
                 QMessageBox.information(self, "Info", "Issue has been added")
 
                 self.Parent.funcDisplayIssues()
@@ -193,9 +200,8 @@ class AddIssue(QWidget):
         else:
             QMessageBox.information(self, "Info", "Fields cannot be empty")
 
-
-
     # Need to figure out how attach files to items in db
+    @Slot()
     def funcAttachFiles(self):
         # Check if the default directory for media exists, if not create one
 
@@ -204,8 +210,8 @@ class AddIssue(QWidget):
         # else:
         #     QMessageBox.information(self, "Info", "Cannot create media directory!")
 
-
-        self.filePathName = QFileDialog.getOpenFileName(self, "Attach file...", "/", "Image files (*.jpg, *.jpeg, *.png)")[0]
+        self.filePathName = QFileDialog.getOpenFileName(self, "Attach file...", "/",
+                                                        "Image files (*.jpg, *.jpeg, *.png)")[0]
 
         if osPath.isfile(self.filePathName):
             fileName, fileExt = osPath.splitext(self.filePathName)
@@ -213,7 +219,8 @@ class AddIssue(QWidget):
             if fileExt == '.jpg' or fileExt == '.jpeg' or fileExt == '.png':
                 date = datetime.now()
                 randomSuffix = "".join(random.choice(string.ascii_lowercase) for i in range(15))
-                self.attachedFilePath = "./assets/media/issues-media/" + "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix+fileExt
+                self.attachedFilePath = "./assets/media/issues-media/" + \
+                                        "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + fileExt
 
                 QMessageBox.information(self, "Info", "File attached successfully")
 

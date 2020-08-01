@@ -1,8 +1,8 @@
 import sys, os
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QComboBox, QFrame, QFormLayout, QMessageBox
+    QComboBox, QFrame, QFormLayout, QMessageBox, QSpacerItem, QSizePolicy
 from PySide2.QtGui import QIcon, QPixmap
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, Slot
 
 import backend
 
@@ -34,11 +34,10 @@ class AddPerson(QWidget):
         self.img = QPixmap('assets/icons/edit-item.png')
         self.addPersonImg.setPixmap(self.img)
         self.addPersonImg.setAlignment(Qt.AlignCenter)
-        self.titleText = QLabel("Add person")
+        self.titleText = QLabel("ADD PERSON")
+        self.titleText.setObjectName("add_person_title_txt")
         self.titleText.setAlignment(Qt.AlignCenter)
         # Bottom layout widgets
-        self.personInfoTitleText = QLabel("Person info")
-        self.personInfoTitleText.setAlignment(Qt.AlignCenter)
         self.firstNameEntry = QLineEdit()
         self.lastNameEntry = QLineEdit()
         self.titleEntry = QLineEdit()
@@ -56,11 +55,17 @@ class AddPerson(QWidget):
         self.addPersonBtn = QPushButton("Add person")
         self.addPersonBtn.clicked.connect(self.addPerson)
 
+        self.cancelBtn = QPushButton("Cancel")
+        self.cancelBtn.clicked.connect(self.closeWindow)
+
 
     def layouts(self):
         self.mainLayout = QVBoxLayout()
         self.topLayout = QHBoxLayout()
         self.bottomLayout = QFormLayout()
+        self.bottomLayout.setVerticalSpacing(20)
+        self.bottomBtnLayout = QHBoxLayout()
+
         # Put elements into frames for visual distinction
         self.topFrame = QFrame()
         self.bottomFrame = QFrame()
@@ -72,7 +77,6 @@ class AddPerson(QWidget):
         self.topFrame.setLayout(self.topLayout)
 
         # Add widgets to middle layout
-        self.bottomLayout.addWidget(self.personInfoTitleText)
         self.bottomLayout.addRow(QLabel("First name: "), self.firstNameEntry)
         self.bottomLayout.addRow(QLabel("Last name: "), self.lastNameEntry)
         self.bottomLayout.addRow(QLabel("Title: "), self.titleEntry)
@@ -81,7 +85,13 @@ class AddPerson(QWidget):
         self.bottomLayout.addRow(QLabel("Location: "), self.locationEntry)
         self.bottomLayout.addRow(QLabel("Employment type: "), self.employmentTypeEntry)
         self.bottomLayout.addRow(QLabel(""), self.attachPhotoBtn)
-        self.bottomLayout.addRow(QLabel(""), self.addPersonBtn)
+
+        self.bottomBtnLayout.addWidget(self.cancelBtn)
+        self.bottomBtnLayout.addItem(QSpacerItem(200, 5, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.bottomBtnLayout.addWidget(self.addPersonBtn)
+        self.bottomBtnLayout.setAlignment(Qt.AlignBottom)
+
+        self.bottomLayout.addRow(self.bottomBtnLayout)
 
         self.bottomFrame.setLayout(self.bottomLayout)
 
@@ -91,8 +101,11 @@ class AddPerson(QWidget):
 
         self.setLayout(self.mainLayout)
 
+    @Slot()
+    def closeWindow(self):
+        self.close()
 
-
+    @Slot()
     def addPerson(self):
         firstName = self.firstNameEntry.text()
         lastName = self.lastNameEntry.text()
