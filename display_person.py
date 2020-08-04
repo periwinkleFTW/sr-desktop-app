@@ -32,7 +32,7 @@ class DisplayPerson(QWidget):
 
     def personDetails(self):
         row = self.Parent.peopleTable.currentRow()
-        personId = self.Parent.peopleTable.item(row, 0).text()
+        personId = self.Parent.peopleTable.item(row, 2).text()
 
         # Adding prefixes to tables changed the format of the Id from and integer to a string PRN#+id
         # Following code strips letters
@@ -115,7 +115,7 @@ class DisplayPerson(QWidget):
 
     def updatePerson(self):
         row = self.Parent.peopleTable.currentRow()
-        personId = self.Parent.peopleTable.item(row, 0).text()
+        personId = self.Parent.peopleTable.item(row, 2).text()
         personId = personId.lstrip("PRN#")
 
         firstName = self.firstNameEntry.text()

@@ -4,13 +4,11 @@
 # This is a main script for the application
 ######################################################
 
-try:
-    from PySide2.QtGui     import QIcon
-    from PySide2.QtWidgets import QApplication, QMainWindow, QAction
 
-except ImportError:
-    from PyQt5.QtGui     import QIcon
-    from PyQt5.QtWidgets import QApplication, QMainWindow, QAction
+from PySide2.QtGui     import QIcon
+from PySide2.QtWidgets import QApplication, QMainWindow, QAction
+
+
 
 from sys import exit as sysExit
 from center_pane import CenterPanel

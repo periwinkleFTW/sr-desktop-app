@@ -21,7 +21,10 @@ class Database:
                                     "person_phone TEXT," \
                                     "person_email TEXT," \
                                     "person_location TEXT," \
-                                    "person_empl_type TEXT" \
+                                    "person_empl_type TEXT," \
+                                    "photo_original_path TEXT," \
+                                    "photo_resized_path TEXT," \
+                                    "thumbnail_path TEXT" \
                                     ")"
         self.sqlCreateFacilitiesTable = "CREATE TABLE IF NOT EXISTS facilities (" \
                                         "facility_id INTEGER PRIMARY KEY AUTOINCREMENT, " \

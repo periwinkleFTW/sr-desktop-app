@@ -25,6 +25,8 @@ class AddIssue(QWidget):
 
         self.Parent = parent
 
+        self.filePathName = ""
+
         self.UI()
         self.show()
 
@@ -203,13 +205,6 @@ class AddIssue(QWidget):
     # Need to figure out how attach files to items in db
     @Slot()
     def funcAttachFiles(self):
-        # Check if the default directory for media exists, if not create one
-
-        # if not os.path.isdir("./assets/media/issues-media"):
-        #     os.makedirs("./assets/media/issues-media")
-        # else:
-        #     QMessageBox.information(self, "Info", "Cannot create media directory!")
-
         self.filePathName = QFileDialog.getOpenFileName(self, "Attach file...", "/",
                                                         "Image files (*.jpg, *.jpeg, *.png)")[0]
 

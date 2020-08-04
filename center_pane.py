@@ -3,12 +3,11 @@
 # This script contains GUI elements of the app
 ######################################################
 
-try:
-    from PySide2.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QLabel
-    from PySide2.QtGui import QLinearGradient, QPixmap
 
-except ImportError:
-    from PyQt5.QtWidgets import QWidget, QTabWidget, QHBoxLayout
+from PySide2.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QLabel
+from PySide2.QtGui import QLinearGradient, QPixmap
+
+
 
 
 # Note the following are not part of PySide2 nor PyQt5 so not need to put within this

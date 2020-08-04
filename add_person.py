@@ -1,15 +1,21 @@
-import sys, os
+import random
+import string
+from datetime import datetime
+from os import path as osPath
+from shutil import copy2 as ShCopy2
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
+
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QComboBox, QFrame, QFormLayout, QMessageBox, QSpacerItem, QSizePolicy
+    QComboBox, QFrame, QFormLayout, QMessageBox, QSpacerItem, QSizePolicy, QFileDialog
 from PySide2.QtGui import QIcon, QPixmap
 from PySide2.QtCore import Qt, Slot
 
 import backend
 
-
 db = backend.Database("sr-data.db")
 
 defaultImg = "assets/icons/logo-dark.png"
+
 
 class AddPerson(QWidget):
     def __init__(self, parent):
@@ -17,9 +23,11 @@ class AddPerson(QWidget):
         self.setWindowTitle("Add person")
         self.setWindowIcon(QIcon("assets/icons/icon.ico"))
         self.setGeometry(450, 150, 400, 250)
-        #self.setFixedSize(self.size())
+        # self.setFixedSize(self.size())
 
         self.Parent = parent
+
+        self.filePathName = ""
 
         self.UI()
         self.show()
@@ -51,13 +59,13 @@ class AddPerson(QWidget):
         self.employmentTypeEntry.setEditable(True)
 
         self.attachPhotoBtn = QPushButton("Attach photo")
+        self.attachPhotoBtn.clicked.connect(self.funcAttachFiles)
 
         self.addPersonBtn = QPushButton("Add person")
         self.addPersonBtn.clicked.connect(self.addPerson)
 
         self.cancelBtn = QPushButton("Cancel")
         self.cancelBtn.clicked.connect(self.closeWindow)
-
 
     def layouts(self):
         self.mainLayout = QVBoxLayout()
@@ -115,13 +123,38 @@ class AddPerson(QWidget):
         location = self.locationEntry.text()
         emplType = self.employmentTypeEntry.currentText()
 
+        # If user selected a file to attach, rename the file and copy it to media folder
+        # Else set the path variables to empty strings to avoid problems with db write
+        if self.filePathName != "":
+            self.newFilePath = ShCopy2(self.filePathName, self.attachedFilePath)
+
+            im = Image.open(self.filePathName)
+
+            im_resized = self.crop_max_square(im).resize((800, 800), Image.LANCZOS)
+            im_resized.save(self.attachedResizedFilePath)
+
+            im_square = self.crop_max_square(im).resize((60, 60), Image.LANCZOS)
+            im_thumb = self.mask_circle_transparent(im_square, 60, 60, 2)
+
+            im_thumb.save(self.attachedThumbnailPath)
+        else:
+            self.attachedFilePath = ""
+            self.attachedResizedFilePath = ""
+            self.attachedThumbnailPath = ""
+
         if (firstName and lastName and title and phone and email and location and emplType != ""):
             try:
                 query = "INSERT INTO people (person_first_name, person_last_name, person_title, person_phone," \
-                        "person_email, person_location, person_empl_type) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                        "person_email, person_location, person_empl_type, photo_original_path, photo_resized_path, " \
+                        "thumbnail_path) " \
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                print("before exec")
+                db.cur.execute(query, (firstName, lastName, title, phone, email, location, emplType,
+                                       self.attachedFilePath, self.attachedResizedFilePath, self.attachedThumbnailPath))
+                print("before commit")
 
-                db.cur.execute(query, (firstName, lastName, title, phone, email, location, emplType))
                 db.conn.commit()
+                print("after commit")
 
                 self.Parent.funcDisplayPeople()
                 QMessageBox.information(self, "Info", "Member has been added")
@@ -130,3 +163,67 @@ class AddPerson(QWidget):
                 QMessageBox.information(self, "Info", "Member has not been added")
         else:
             QMessageBox.information(self, "Info", "Fields cannot be empty")
+
+    @Slot()
+    def funcAttachFiles(self):
+        self.filePathName = QFileDialog.getOpenFileName(self, "Attach file...", "/",
+                                                        "Image files (*.png *.jpeg *.jpg)")[0]
+
+        if osPath.isfile(self.filePathName):
+            fileName, fileExt = osPath.splitext(self.filePathName)
+
+            if fileExt == '.jpg' or fileExt == '.jpeg' or fileExt == '.png':
+                date = datetime.now()
+                randomSuffix = "".join(random.choice(string.ascii_lowercase) for i in range(15))
+                self.attachedFilePath = "./assets/media/people-media/photos/" + \
+                                        "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + fileExt
+                self.attachedResizedFilePath = "./assets/media/people-media/resized_photos/" + \
+                                               "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + "_resized" + fileExt
+                self.attachedThumbnailPath = "./assets/media/people-media/thumbnails/" + \
+                                             "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + "_thumbnail" + ".png"
+
+                QMessageBox.information(self, "Info", "File attached successfully")
+
+            else:
+                QMessageBox.information(self, "Info", "Wrong file type!")
+        else:
+            QMessageBox.information(self, "Info", "No file selected")
+
+    ################ Image processing functions ##########################################
+    def crop_center(self, pil_img, crop_width, crop_height):
+        img_width, img_height = pil_img.size
+
+        fill_color = 'rgba(255, 255, 255, 1)'
+
+        if pil_img.mode in ('RGBA', 'LA'):
+            background = Image.new(pil_img.mode[:-1], pil_img.size, fill_color)
+            background.paste(pil_img, pil_img.split()[-1])
+            image = background
+
+        return pil_img.crop(((img_width - crop_width) // 2,
+                             (img_height - crop_height) // 2,
+                             (img_width + crop_width) // 2,
+                             (img_height + crop_height) // 2))
+
+    # Crop the largest possible square from a rectangle
+    def crop_max_square(self, pil_img):
+        return self.crop_center(pil_img, min(pil_img.size), min(pil_img.size))
+
+    # crop a square image into a circular image
+    def mask_circle_transparent(self, pil_img, crop_width, crop_height, blur_radius, offset=0):
+        img_width, img_height = pil_img.size
+        pil_img.crop(((img_width - crop_width) // 2,
+                      (img_height - crop_height) // 2,
+                      (img_width + crop_width) // 2,
+                      (img_height + crop_height) // 2))
+
+        offset = blur_radius * 2 + offset
+        mask = Image.new("L", pil_img.size, 0)
+        draw = ImageDraw.Draw(mask)
+        draw.ellipse((offset, offset, pil_img.size[0] - offset, pil_img.size[1] - offset), fill=255)
+        mask = mask.filter(ImageFilter.GaussianBlur(blur_radius))
+
+        result = pil_img.copy()
+        result.putalpha(mask)
+
+        return result

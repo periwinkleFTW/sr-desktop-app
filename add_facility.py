@@ -1,6 +1,11 @@
+import random
+import string
+from datetime import datetime
+from os import path as osPath
+from shutil import copy2 as ShCopy2
 
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
-    QFrame, QFormLayout, QMessageBox, QSpacerItem, QSizePolicy
+    QFrame, QFormLayout, QMessageBox, QSpacerItem, QSizePolicy, QFileDialog
 from PySide2.QtGui import QPixmap, QIcon
 from PySide2.QtCore import Qt, Slot
 
@@ -20,6 +25,8 @@ class AddFacility(QWidget):
         #self.setFixedSize(self.size())
 
         self.Parent = parent
+
+        self.filePathName = ""
 
         self.UI()
         self.show()
@@ -48,6 +55,7 @@ class AddFacility(QWidget):
         self.facilitySupervisorEntry = QLineEdit()
 
         self.attachPhotoBtn = QPushButton("Attach photo")
+        self.attachPhotoBtn.clicked.connect(self.funcAttachFiles)
 
         self.addFacilityBtn = QPushButton("Add facility")
         self.addFacilityBtn.clicked.connect(self.addFacility)
@@ -104,6 +112,10 @@ class AddFacility(QWidget):
 
     @Slot()
     def addFacility(self):
+        # If user selected a file to attach, rename the file and copy it to media folder
+        if self.filePathName != "":
+            self.newFilePath = ShCopy2(self.filePathName, self.attachedFilePath)
+
         name = self.facilityNameEntry.text()
         location = self.facilityLocationEntry.text()
         phone = self.facilityPhoneEntry.text()
@@ -125,6 +137,28 @@ class AddFacility(QWidget):
                 QMessageBox.information(self, "Info", "Facility has not been added")
         else:
             QMessageBox.information(self, "Info", "Fields cannot be empty")
+
+
+    @Slot()
+    def funcAttachFiles(self):
+        self.filePathName = QFileDialog.getOpenFileName(self, "Attach file...", "/",
+                                                        "Image files (*.jpg, *.jpeg, *.png)")[0]
+
+        if osPath.isfile(self.filePathName):
+            fileName, fileExt = osPath.splitext(self.filePathName)
+
+            if fileExt == '.jpg' or fileExt == '.jpeg' or fileExt == '.png':
+                date = datetime.now()
+                randomSuffix = "".join(random.choice(string.ascii_lowercase) for i in range(15))
+                self.attachedFilePath = "./assets/media/facilities-media/" + \
+                                        "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + fileExt
+
+                QMessageBox.information(self, "Info", "File attached successfully")
+
+            else:
+                QMessageBox.information(self, "Info", "Wrong file type!")
+        else:
+            QMessageBox.information(self, "Info", "Something went wrong. Try again...")
 
 
 

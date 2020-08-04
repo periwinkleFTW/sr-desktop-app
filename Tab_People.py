@@ -1,14 +1,10 @@
 
-try:
-    from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
-        QTableWidgetItem, QTableWidget, QGroupBox, QHeaderView, QAbstractItemView, QTableView, QCheckBox, \
-        QMessageBox, QFileDialog
-    from PySide2.QtCore import Qt, Slot
-except:
-    from PyQt.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
-        QTableWidgetItem, QTableWidget, QGroupBox, QHeaderView, QAbstractItemView, QTableView, QCheckBox, \
-        QMessageBox, QFileDialog
-    from PyQt.QtCore import Qt
+from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
+    QTableWidgetItem, QTableWidget, QGroupBox, QHeaderView, QAbstractItemView, QTableView, QCheckBox, \
+    QMessageBox, QFileDialog
+from PySide2.QtCore import Qt, Slot
+from PySide2.QtGui import QPixmap
+
 
 import csv
 import datetime
@@ -63,23 +59,27 @@ class PeopleTab(QWidget):
         self.peopleTable.verticalHeader().hide()
         self.peopleTable.setSortingEnabled(True)
         self.peopleTable.setShowGrid(False)
-        self.peopleTable.verticalHeader().setDefaultSectionSize(40)
-        self.peopleTable.setColumnCount(8)
+        self.peopleTable.verticalHeader().setDefaultSectionSize(90)
+        self.peopleTable.setColumnCount(10)
+
         # self.peopleTable.setColumnHidden(0, True)
-        self.peopleTable.setHorizontalHeaderItem(0, QTableWidgetItem("ID"))
-        self.peopleTable.setHorizontalHeaderItem(1, QTableWidgetItem("First name"))
-        self.peopleTable.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.peopleTable.setHorizontalHeaderItem(2, QTableWidgetItem("Last name"))
-        self.peopleTable.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.peopleTable.setHorizontalHeaderItem(3, QTableWidgetItem("Title"))
-        self.peopleTable.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
-        self.peopleTable.setHorizontalHeaderItem(4, QTableWidgetItem("Phone"))
+        self.peopleTable.setHorizontalHeaderItem(0, QTableWidgetItem(""))
+        self.peopleTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.peopleTable.setHorizontalHeaderItem(1, QTableWidgetItem("Photo"))
+        self.peopleTable.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.peopleTable.setHorizontalHeaderItem(2, QTableWidgetItem("ID"))
+        self.peopleTable.setHorizontalHeaderItem(3, QTableWidgetItem("First name"))
         self.peopleTable.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
-        self.peopleTable.setHorizontalHeaderItem(5, QTableWidgetItem("Email"))
+        self.peopleTable.setHorizontalHeaderItem(4, QTableWidgetItem("Last name"))
         self.peopleTable.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
-        self.peopleTable.setHorizontalHeaderItem(6, QTableWidgetItem("Location"))
-        self.peopleTable.setHorizontalHeaderItem(7, QTableWidgetItem("Employment type"))
+        self.peopleTable.setHorizontalHeaderItem(5, QTableWidgetItem("Title"))
+        self.peopleTable.setHorizontalHeaderItem(6, QTableWidgetItem("Phone"))
+        self.peopleTable.horizontalHeader().setSectionResizeMode(6, QHeaderView.Stretch)
+        self.peopleTable.setHorizontalHeaderItem(7, QTableWidgetItem("Email"))
         self.peopleTable.horizontalHeader().setSectionResizeMode(7, QHeaderView.Stretch)
+        self.peopleTable.setHorizontalHeaderItem(8, QTableWidgetItem("Location"))
+        self.peopleTable.setHorizontalHeaderItem(9, QTableWidgetItem("Employment type"))
+        self.peopleTable.horizontalHeader().setSectionResizeMode(9, QHeaderView.ResizeToContents)
 
         # Double clicking a row opens a window with person details
         self.peopleTable.doubleClicked.connect(self.selectedPerson)
@@ -185,18 +185,26 @@ class PeopleTab(QWidget):
             row_number = self.peopleTable.rowCount()
             self.peopleTable.insertRow(row_number)
             # Add checkboxes to the table
-            qwidget = QWidget()
-            checkbox = QCheckBox()
-            checkbox.setCheckState(Qt.Unchecked)
-            qhboxlayout = QHBoxLayout(qwidget)
-            qhboxlayout.addWidget(checkbox)
-            qhboxlayout.setAlignment(Qt.AlignRight)
-            qhboxlayout.setContentsMargins(0, 0, 20, 0)
-            self.peopleTable.setCellWidget(row_number, 0, qwidget)
-            self.peopleTable.setItem(row_number, 1, QTableWidgetItem(str(row_number)))
-
-            for column_number, data in enumerate(row_data):
-                if column_number == 0:
+            widget = QWidget()
+            checkBox = QCheckBox()
+            checkBox.setCheckState(Qt.Unchecked)
+            hBoxLayout = QHBoxLayout(widget)
+            hBoxLayout.addWidget(checkBox)
+            hBoxLayout.setAlignment(Qt.AlignCenter)
+            self.peopleTable.setCellWidget(row_number, 0, widget)
+            self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+            # Add photo thumbnails to the table
+            thumbWidget = QWidget()
+            pic = QPixmap(str(row_data[10]))
+            thumbLabel = QLabel()
+            thumbLabel.setPixmap(pic)
+            thumbLayout = QHBoxLayout(thumbWidget)
+            thumbLayout.addWidget(thumbLabel)
+            self.peopleTable.setCellWidget(row_number, 1, thumbWidget)
+            self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+            # Fill the rest of the data
+            for column_number, data in enumerate(row_data, start=2):
+                if column_number == 2:
                     self.peopleTable.setItem(row_number, column_number, QTableWidgetItem("PRN#" + str(data)))
                 else:
                     self.peopleTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
@@ -215,7 +223,7 @@ class PeopleTab(QWidget):
         checked_list = []
         for i in range(self.peopleTable.rowCount()):
             if self.peopleTable.cellWidget(i, 0).findChild(type(QCheckBox())).isChecked():
-                item = self.peopleTable.item(i, 0).text()
+                item = self.peopleTable.item(i, 2).text()
                 checked_list.append(item.lstrip("PRN#"))
         return checked_list
 
@@ -266,41 +274,119 @@ class PeopleTab(QWidget):
         if self.allPeopleRadioBtn.isChecked():
             self.funcDisplayPeople()
         elif self.employeesPeopleRadioBtn.isChecked():
-            query = "SELECT * FROM people WHERE person_empl_type = 'Employee'"
-            people = db.cur.execute(query).fetchall()
+            try:
+                query = "SELECT * FROM people WHERE person_empl_type = 'Employee'"
+                people = db.cur.execute(query).fetchall()
 
-            for i in reversed(range(self.peopleTable.rowCount())):
-                self.peopleTable.removeRow(i)
+                for i in reversed(range(self.peopleTable.rowCount())):
+                    self.peopleTable.removeRow(i)
 
-            for row_data in people:
-                row_number = self.peopleTable.rowCount()
-                self.peopleTable.insertRow(row_number)
-                for column_number, data in enumerate(row_data):
-                    self.peopleTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+                for row_data in people:
+                    row_number = self.peopleTable.rowCount()
+                    self.peopleTable.insertRow(row_number)
+                    # Add checkboxes to the table
+                    widget = QWidget()
+                    checkBox = QCheckBox()
+                    checkBox.setCheckState(Qt.Unchecked)
+                    hBoxLayout = QHBoxLayout(widget)
+                    hBoxLayout.addWidget(checkBox)
+                    hBoxLayout.setAlignment(Qt.AlignCenter)
+                    self.peopleTable.setCellWidget(row_number, 0, widget)
+                    self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+                    # Add photo thumbnails to the table
+                    thumbWidget = QWidget()
+                    pic = QPixmap(
+                        "./assets/media/people-media/thumbnails/01Aug2020_18h01mtrtgzteuzuspxrp_thumbnail.png")
+                    thumbLabel = QLabel()
+                    thumbLabel.setPixmap(pic)
+                    thumbLayout = QHBoxLayout(thumbWidget)
+                    thumbLayout.addWidget(thumbLabel)
+                    self.peopleTable.setCellWidget(row_number, 1, thumbWidget)
+                    self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+                    # Fill the rest of the data
+                    for column_number, data in enumerate(row_data, start=2):
+                        if column_number == 2:
+                            self.peopleTable.setItem(row_number, column_number, QTableWidgetItem("PRN#" + str(data)))
+                        else:
+                            self.peopleTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+            except:
+                QMessageBox.information(self, "Info", "Cannot access database")
         elif self.contractorsPeopleRadioBtn.isChecked():
-            query = "SELECT * FROM people WHERE person_empl_type = 'Contractor'"
-            people = db.cur.execute(query).fetchall()
+            try:
+                query = "SELECT * FROM people WHERE person_empl_type = 'Contractor'"
+                people = db.cur.execute(query).fetchall()
 
-            for i in reversed(range(self.peopleTable.rowCount())):
-                self.peopleTable.removeRow(i)
+                for i in reversed(range(self.peopleTable.rowCount())):
+                    self.peopleTable.removeRow(i)
 
-            for row_data in people:
-                row_number = self.peopleTable.rowCount()
-                self.peopleTable.insertRow(row_number)
-                for column_number, data in enumerate(row_data):
-                    self.peopleTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+                for row_data in people:
+                    row_number = self.peopleTable.rowCount()
+                    self.peopleTable.insertRow(row_number)
+                    # Add checkboxes to the table
+                    widget = QWidget()
+                    checkBox = QCheckBox()
+                    checkBox.setCheckState(Qt.Unchecked)
+                    hBoxLayout = QHBoxLayout(widget)
+                    hBoxLayout.addWidget(checkBox)
+                    hBoxLayout.setAlignment(Qt.AlignCenter)
+                    self.peopleTable.setCellWidget(row_number, 0, widget)
+                    self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+                    # Add photo thumbnails to the table
+                    thumbWidget = QWidget()
+                    pic = QPixmap(
+                        "./assets/media/people-media/thumbnails/01Aug2020_18h01mtrtgzteuzuspxrp_thumbnail.png")
+                    thumbLabel = QLabel()
+                    thumbLabel.setPixmap(pic)
+                    thumbLayout = QHBoxLayout(thumbWidget)
+                    thumbLayout.addWidget(thumbLabel)
+                    self.peopleTable.setCellWidget(row_number, 1, thumbWidget)
+                    self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+                    # Fill the rest of the data
+                    for column_number, data in enumerate(row_data, start=2):
+                        if column_number == 2:
+                            self.peopleTable.setItem(row_number, column_number, QTableWidgetItem("PRN#" + str(data)))
+                        else:
+                            self.peopleTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+            except:
+                QMessageBox.information(self, "Info", "Cannot access database")
         elif self.subcontractorsPeopleRadioBtn.isChecked():
-            query = "SELECT * FROM people WHERE person_empl_type = 'Subcontractor'"
-            people = db.cur.execute(query).fetchall()
+            try:
+                query = "SELECT * FROM people WHERE person_empl_type = 'Subcontractor'"
+                people = db.cur.execute(query).fetchall()
 
-            for i in reversed(range(self.peopleTable.rowCount())):
-                self.peopleTable.removeRow(i)
+                for i in reversed(range(self.peopleTable.rowCount())):
+                    self.peopleTable.removeRow(i)
 
-            for row_data in people:
-                row_number = self.peopleTable.rowCount()
-                self.peopleTable.insertRow(row_number)
-                for column_number, data in enumerate(row_data):
-                    self.peopleTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+                for row_data in people:
+                    row_number = self.peopleTable.rowCount()
+                    self.peopleTable.insertRow(row_number)
+                    # Add checkboxes to the table
+                    widget = QWidget()
+                    checkBox = QCheckBox()
+                    checkBox.setCheckState(Qt.Unchecked)
+                    hBoxLayout = QHBoxLayout(widget)
+                    hBoxLayout.addWidget(checkBox)
+                    hBoxLayout.setAlignment(Qt.AlignCenter)
+                    self.peopleTable.setCellWidget(row_number, 0, widget)
+                    self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+                    # Add photo thumbnails to the table
+                    thumbWidget = QWidget()
+                    pic = QPixmap(
+                        "./assets/media/people-media/thumbnails/01Aug2020_18h01mtrtgzteuzuspxrp_thumbnail.png")
+                    thumbLabel = QLabel()
+                    thumbLabel.setPixmap(pic)
+                    thumbLayout = QHBoxLayout(thumbWidget)
+                    thumbLayout.addWidget(thumbLabel)
+                    self.peopleTable.setCellWidget(row_number, 1, thumbWidget)
+                    self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+                    # Fill the rest of the data
+                    for column_number, data in enumerate(row_data, start=2):
+                        if column_number == 2:
+                            self.peopleTable.setItem(row_number, column_number, QTableWidgetItem("PRN#" + str(data)))
+                        else:
+                            self.peopleTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+            except:
+                QMessageBox.information(self, "Info", "Cannot access database")
 
     @Slot()
     def searchPeople(self):
@@ -311,30 +397,57 @@ class PeopleTab(QWidget):
         else:
             # Erase search entry
             self.searchPeopleEntry.setText("")
-            query = "SELECT * FROM people WHERE " \
-                    "person_id LIKE ? " \
-                    "OR person_first_name LIKE ?" \
-                    "OR person_last_name LIKE ?" \
-                    "OR person_title LIKE ?" \
-                    "OR person_phone LIKE ?" \
-                    "OR person_email LIKE ?" \
-                    "OR person_location LIKE ?" \
-                    "OR person_empl_type LIKE ?"
-            results = db.cur.execute(query, ('%' + value + '%', '%' + value + '%', '%' + value + '%',
-                                             '%' + value + '%', '%' + value + '%', '%' + value + '%',
-                                             '%' + value + '%', '%' + value + '%',)).fetchall()
-            if results == []:
-                QMessageBox.information(self, "Info", "Nothing was found")
-                self.displayPeople()
-            else:
-                for i in reversed(range(self.peopleTable.rowCount())):
-                    self.peopleTable.removeRow(i)
+            try:
+                query = "SELECT * FROM people WHERE " \
+                        "person_id LIKE ? " \
+                        "OR person_first_name LIKE ?" \
+                        "OR person_last_name LIKE ?" \
+                        "OR person_title LIKE ?" \
+                        "OR person_phone LIKE ?" \
+                        "OR person_email LIKE ?" \
+                        "OR person_location LIKE ?" \
+                        "OR person_empl_type LIKE ?"
+                results = db.cur.execute(query, ('%' + value + '%', '%' + value + '%', '%' + value + '%',
+                                                 '%' + value + '%', '%' + value + '%', '%' + value + '%',
+                                                 '%' + value + '%', '%' + value + '%',)).fetchall()
+                if results == []:
+                    QMessageBox.information(self, "Info", "Nothing was found")
+                    self.displayPeople()
+                else:
+                    for i in reversed(range(self.peopleTable.rowCount())):
+                        self.peopleTable.removeRow(i)
 
-                for row_data in results:
-                    row_number = self.peopleTable.rowCount()
-                    self.peopleTable.insertRow(row_number)
-                    for column_number, data in enumerate(row_data):
-                        self.peopleTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+                    for row_data in results:
+                        row_number = self.peopleTable.rowCount()
+                        self.peopleTable.insertRow(row_number)
+                        # Add checkboxes to the table
+                        qwidget = QWidget()
+                        checkbox = QCheckBox()
+                        checkbox.setCheckState(Qt.Unchecked)
+                        qhboxlayout = QHBoxLayout(qwidget)
+                        qhboxlayout.addWidget(checkbox)
+                        qhboxlayout.setAlignment(Qt.AlignCenter)
+                        self.peopleTable.setCellWidget(row_number, 0, qwidget)
+                        self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+                        # Add photo thumbnails to the table
+                        thumbWidget = QWidget()
+                        pic = QPixmap(
+                            "./assets/media/people-media/thumbnails/01Aug2020_18h01mtrtgzteuzuspxrp_thumbnail.png")
+                        thumbLabel = QLabel()
+                        thumbLabel.setPixmap(pic)
+                        thumbLayout = QHBoxLayout(thumbWidget)
+                        thumbLayout.addWidget(thumbLabel)
+                        self.peopleTable.setCellWidget(row_number, 1, thumbWidget)
+                        self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+
+                        for column_number, data in enumerate(row_data, start=2):
+                            if column_number == 2:
+                                self.peopleTable.setItem(row_number, column_number,
+                                                         QTableWidgetItem("PRN#" + str(data)))
+                            else:
+                                self.peopleTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+            except:
+                QMessageBox.information(self, "Info", "Cannot access database")
 
     @Slot()
     def funcPeopleToCSV(self):

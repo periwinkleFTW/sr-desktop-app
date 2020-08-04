@@ -1,12 +1,8 @@
-try:
-    from PySide2.QtCore import Qt, Slot
-    from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
-        QTableWidgetItem, QTableWidget, QGroupBox, QCheckBox, QAbstractItemView, QTableView, QMessageBox, \
-        QFileDialog, QHeaderView
-except:
-    from PyQt.QtCore import Qt
-    from PyQt.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
-        QTableWidgetItem, QTableWidget, QGroupBox, QCheckBox, QAbstractItemView, QTableView, QMessageBox, QFileDialog
+
+from PySide2.QtCore import Qt, Slot
+from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
+    QTableWidgetItem, QTableWidget, QGroupBox, QCheckBox, QAbstractItemView, QTableView, QMessageBox, \
+    QFileDialog, QHeaderView
 
 import datetime
 import csv
@@ -66,23 +62,25 @@ class IssuesTab(QWidget):
         self.issuesTable.setSortingEnabled(True)
         self.issuesTable.setShowGrid(False)
         self.issuesTable.verticalHeader().setDefaultSectionSize(40)
-        self.issuesTable.setColumnCount(11)
+        self.issuesTable.setColumnCount(12)
 
         # self.issuesTable.setColumnHidden(0, True)
-        self.issuesTable.setHorizontalHeaderItem(0, QTableWidgetItem("ID"))
-        self.issuesTable.setHorizontalHeaderItem(1, QTableWidgetItem("Date"))
-        self.issuesTable.setHorizontalHeaderItem(2, QTableWidgetItem("Priority"))
-        self.issuesTable.setHorizontalHeaderItem(3, QTableWidgetItem("Observer"))
+        self.issuesTable.setHorizontalHeaderItem(0, QTableWidgetItem(""))
+        self.issuesTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.issuesTable.setHorizontalHeaderItem(1, QTableWidgetItem("ID"))
+        self.issuesTable.setHorizontalHeaderItem(2, QTableWidgetItem("Date"))
+        self.issuesTable.setHorizontalHeaderItem(3, QTableWidgetItem("Priority"))
+        self.issuesTable.setHorizontalHeaderItem(4, QTableWidgetItem("Observer"))
         self.issuesTable.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
-        self.issuesTable.setHorizontalHeaderItem(4, QTableWidgetItem("Inspection name"))
+        self.issuesTable.setHorizontalHeaderItem(5, QTableWidgetItem("Inspection name"))
         self.issuesTable.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
-        self.issuesTable.setHorizontalHeaderItem(5, QTableWidgetItem("Theme"))
+        self.issuesTable.setHorizontalHeaderItem(6, QTableWidgetItem("Theme"))
         self.issuesTable.horizontalHeader().setSectionResizeMode(5, QHeaderView.Stretch)
-        self.issuesTable.setHorizontalHeaderItem(6, QTableWidgetItem("Facility"))
-        self.issuesTable.setHorizontalHeaderItem(7, QTableWidgetItem("Insp. Dept"))
-        self.issuesTable.setHorizontalHeaderItem(8, QTableWidgetItem("Deadline"))
-        self.issuesTable.setHorizontalHeaderItem(9, QTableWidgetItem("Status"))
-        self.issuesTable.setHorizontalHeaderItem(10, QTableWidgetItem("Created on"))
+        self.issuesTable.setHorizontalHeaderItem(7, QTableWidgetItem("Facility"))
+        self.issuesTable.setHorizontalHeaderItem(8, QTableWidgetItem("Insp. Dept"))
+        self.issuesTable.setHorizontalHeaderItem(9, QTableWidgetItem("Deadline"))
+        self.issuesTable.setHorizontalHeaderItem(10, QTableWidgetItem("Status"))
+        self.issuesTable.setHorizontalHeaderItem(11, QTableWidgetItem("Created on"))
 
         # Double clicking a row opens a window with issue details
         self.issuesTable.doubleClicked.connect(self.funcSelectedIssue)
@@ -201,13 +199,12 @@ class IssuesTab(QWidget):
             checkbox.setCheckState(Qt.Unchecked)
             qhboxlayout = QHBoxLayout(qwidget)
             qhboxlayout.addWidget(checkbox)
-            qhboxlayout.setAlignment(Qt.AlignRight)
-            qhboxlayout.setContentsMargins(0, 0, 20, 0)
+            qhboxlayout.setAlignment(Qt.AlignCenter)
             self.issuesTable.setCellWidget(row_number, 0, qwidget)
-            self.issuesTable.setItem(row_number, 0, QTableWidgetItem(str(row_number)))
+            self.issuesTable.setItem(row_number, 0, QTableWidgetItem(row_number))
 
-            for column_number, data in enumerate(row_data):
-                if column_number == 0:
+            for column_number, data in enumerate(row_data, start=1):
+                if column_number == 1:
                     self.issuesTable.setItem(row_number, column_number, QTableWidgetItem("ISS#" + str(data)))
                 else:
                     self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
@@ -226,7 +223,7 @@ class IssuesTab(QWidget):
         checked_list = []
         for i in range(self.issuesTable.rowCount()):
             if self.issuesTable.cellWidget(i, 0).findChild(type(QCheckBox())).isChecked():
-                item = self.issuesTable.item(i, 0).text()
+                item = self.issuesTable.item(i, 1).text()
                 checked_list.append(item.lstrip("ISS#"))
         return checked_list
 
@@ -243,79 +240,143 @@ class IssuesTab(QWidget):
         else:
             # Erase search entry
             self.searchIssuesEntry.setText("")
-            query = "SELECT * FROM issues WHERE " \
-                    "issue_id LIKE ? " \
-                    "OR issue_date LIKE ?" \
-                    "OR issue_priority LIKE ?" \
-                    "OR issue_observer LIKE ?" \
-                    "OR issue_team LIKE ?" \
-                    "OR issue_inspection LIKE ?" \
-                    "OR issue_theme LIKE ?" \
-                    "OR issue_facility LIKE ?" \
-                    "OR issue_fac_supervisor LIKE ?" \
-                    "OR issue_spec_loc LIKE ?" \
-                    "OR issue_insp_dept LIKE ?" \
-                    "OR issue_insp_contr LIKE ?" \
-                    "OR issue_insp_subcontr LIKE ?" \
-                    "OR issue_deadline LIKE ?"
-            results = db.cur.execute(query, ('%' + value + '%', '%' + value + '%', '%' + value + '%', '%' + value + '%',
-                                             '%' + value + '%', '%' + value + '%', '%' + value + '%', '%' + value + '%',
-                                             '%' + value + '%', '%' + value + '%', '%' + value + '%', '%' + value + '%',
-                                             '%' + value + '%', '%' + value + '%',)).fetchall()
-            if results == []:
-                QMessageBox.information(self, "Info", "Nothing was found")
-                self.funcDisplayIssues()
-            else:
-                for i in reversed(range(self.issuesTable.rowCount())):
-                    self.issuesTable.removeRow(i)
+            try:
+                query = "SELECT * FROM issues WHERE " \
+                        "issue_id LIKE ? " \
+                        "OR issue_date LIKE ?" \
+                        "OR issue_priority LIKE ?" \
+                        "OR issue_observer LIKE ?" \
+                        "OR issue_team LIKE ?" \
+                        "OR issue_inspection LIKE ?" \
+                        "OR issue_theme LIKE ?" \
+                        "OR issue_facility LIKE ?" \
+                        "OR issue_fac_supervisor LIKE ?" \
+                        "OR issue_spec_loc LIKE ?" \
+                        "OR issue_insp_dept LIKE ?" \
+                        "OR issue_insp_contr LIKE ?" \
+                        "OR issue_insp_subcontr LIKE ?" \
+                        "OR issue_deadline LIKE ?"
+                results = db.cur.execute(query, ('%' + value + '%', '%' + value + '%', '%' + value + '%', '%' + value + '%',
+                                                 '%' + value + '%', '%' + value + '%', '%' + value + '%', '%' + value + '%',
+                                                 '%' + value + '%', '%' + value + '%', '%' + value + '%', '%' + value + '%',
+                                                 '%' + value + '%', '%' + value + '%',)).fetchall()
+                if results == []:
+                    QMessageBox.information(self, "Info", "Nothing was found")
+                    self.funcDisplayIssues()
+                else:
+                    for i in reversed(range(self.issuesTable.rowCount())):
+                        self.issuesTable.removeRow(i)
 
-                for row_data in results:
-                    row_number = self.issuesTable.rowCount()
-                    self.issuesTable.insertRow(row_number)
-                    for column_number, data in enumerate(row_data):
-                        self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+                    for row_data in results:
+                        row_number = self.issuesTable.rowCount()
+                        self.issuesTable.insertRow(row_number)
+                        # Add checkboxes to the table
+                        qwidget = QWidget()
+                        checkbox = QCheckBox()
+                        checkbox.setCheckState(Qt.Unchecked)
+                        qhboxlayout = QHBoxLayout(qwidget)
+                        qhboxlayout.addWidget(checkbox)
+                        qhboxlayout.setAlignment(Qt.AlignCenter)
+                        self.issuesTable.setCellWidget(row_number, 0, qwidget)
+                        self.issuesTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+                        for column_number, data in enumerate(row_data, start=1):
+                            if column_number == 1:
+                                self.issuesTable.setItem(row_number, column_number,
+                                                         QTableWidgetItem("ISS#" + str(data)))
+                            else:
+                                self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+            except:
+                QMessageBox.information(self, "Info", "Cannot access database")
 
     @Slot()
     def funcListIssues(self):
-        if self.allIssuesRadioBtn.isChecked():
-            self.funcDisplayIssues()
-        elif self.ongoingIssuesRadioBtn.isChecked():
-            query = "SELECT * FROM issues WHERE status='Open' " \
-                    "AND issue_deadline > DATETIME('now')"
-            issues = db.cur.execute(query).fetchall()
+        try:
+            if self.allIssuesRadioBtn.isChecked():
+                self.funcDisplayIssues()
+            elif self.ongoingIssuesRadioBtn.isChecked():
+                query = "SELECT issue_id, issue_date, issue_priority, issue_observer," \
+                                "issue_inspection, issue_theme, issue_facility, issue_insp_dept," \
+                                "issue_deadline, status, created_on FROM issues WHERE status='Open' " \
+                        "AND issue_deadline > DATETIME('now')"
+                issues = db.cur.execute(query).fetchall()
 
-            for i in reversed(range(self.issuesTable.rowCount())):
-                self.issuesTable.removeRow(i)
+                for i in reversed(range(self.issuesTable.rowCount())):
+                    self.issuesTable.removeRow(i)
 
-            for row_data in issues:
-                row_number = self.issuesTable.rowCount()
-                self.issuesTable.insertRow(row_number)
-                for column_number, data in enumerate(row_data):
-                    self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
-        elif self.lateIssuesRadioBtn.isChecked():
-            query = "SELECT * FROM issues WHERE status='Open' AND issue_deadline < DATETIME('now')"
-            issues = db.cur.execute(query).fetchall()
+                for row_data in issues:
+                    row_number = self.issuesTable.rowCount()
+                    self.issuesTable.insertRow(row_number)
+                    # Add checkboxes to the table
+                    qwidget = QWidget()
+                    checkbox = QCheckBox()
+                    checkbox.setCheckState(Qt.Unchecked)
+                    qhboxlayout = QHBoxLayout(qwidget)
+                    qhboxlayout.addWidget(checkbox)
+                    qhboxlayout.setAlignment(Qt.AlignCenter)
+                    self.issuesTable.setCellWidget(row_number, 0, qwidget)
+                    self.issuesTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+                    for column_number, data in enumerate(row_data, start=1):
+                        if column_number == 1:
+                            self.issuesTable.setItem(row_number, column_number,
+                                                     QTableWidgetItem("ISS#" + str(data)))
+                        else:
+                            self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+            elif self.lateIssuesRadioBtn.isChecked():
+                query = "SELECT issue_id, issue_date, issue_priority, issue_observer," \
+                                "issue_inspection, issue_theme, issue_facility, issue_insp_dept," \
+                                "issue_deadline, status, created_on FROM issues WHERE status='Open' AND issue_deadline < DATETIME('now')"
+                issues = db.cur.execute(query).fetchall()
 
-            for i in reversed(range(self.issuesTable.rowCount())):
-                self.issuesTable.removeRow(i)
+                for i in reversed(range(self.issuesTable.rowCount())):
+                    self.issuesTable.removeRow(i)
 
-            for row_data in issues:
-                row_number = self.issuesTable.rowCount()
-                self.issuesTable.insertRow(row_number)
-                for column_number, data in enumerate(row_data):
-                    self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
-        elif self.closedIssuesRadioBtn.isChecked():
-            query = "SELECT * FROM issues WHERE status='Closed'"
-            issues = db.cur.execute(query).fetchall()
+                for row_data in issues:
+                    row_number = self.issuesTable.rowCount()
+                    self.issuesTable.insertRow(row_number)
+                    # Add checkboxes to the table
+                    qwidget = QWidget()
+                    checkbox = QCheckBox()
+                    checkbox.setCheckState(Qt.Unchecked)
+                    qhboxlayout = QHBoxLayout(qwidget)
+                    qhboxlayout.addWidget(checkbox)
+                    qhboxlayout.setAlignment(Qt.AlignCenter)
+                    self.issuesTable.setCellWidget(row_number, 0, qwidget)
+                    self.issuesTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+                    for column_number, data in enumerate(row_data, start=1):
+                        if column_number == 1:
+                            self.issuesTable.setItem(row_number, column_number,
+                                                     QTableWidgetItem("ISS#" + str(data)))
+                        else:
+                            self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+            elif self.closedIssuesRadioBtn.isChecked():
+                query = "SELECT issue_id, issue_date, issue_priority, issue_observer," \
+                                "issue_inspection, issue_theme, issue_facility, issue_insp_dept," \
+                                "issue_deadline, status, created_on FROM issues WHERE status='Closed'"
+                issues = db.cur.execute(query).fetchall()
 
-            for i in reversed(range(self.issuesTable.rowCount())):
-                self.issuesTable.removeRow(i)
+                for i in reversed(range(self.issuesTable.rowCount())):
+                    self.issuesTable.removeRow(i)
 
-            for row_data in issues:
-                row_number = self.issuesTable.rowCount()
-                self.issuesTable.insertRow(row_number)
-                for column_number, data in enumerate(row_data):
-                    self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+                for row_data in issues:
+                    row_number = self.issuesTable.rowCount()
+                    self.issuesTable.insertRow(row_number)
+                    # Add checkboxes to the table
+                    qwidget = QWidget()
+                    checkbox = QCheckBox()
+                    checkbox.setCheckState(Qt.Unchecked)
+                    qhboxlayout = QHBoxLayout(qwidget)
+                    qhboxlayout.addWidget(checkbox)
+                    qhboxlayout.setAlignment(Qt.AlignCenter)
+                    self.issuesTable.setCellWidget(row_number, 0, qwidget)
+                    self.issuesTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+                    for column_number, data in enumerate(row_data, start=1):
+                        if column_number == 1:
+                            self.issuesTable.setItem(row_number, column_number,
+                                                     QTableWidgetItem("ISS#" + str(data)))
+                        else:
+                            self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+        except:
+            QMessageBox.information(self, "Info", "Cannot access database")
 
     @Slot()
     def funcCloseIssue(self):
@@ -342,7 +403,7 @@ class IssuesTab(QWidget):
                 QMessageBox.information(self, "Info", "Something went wrong")
         else:
             row = self.issuesTable.currentRow()
-            issueId = self.issuesTable.item(row, 0).text()
+            issueId = self.issuesTable.item(row, 1).text()
             issueId = issueId.lstrip("ISS#")
 
             try:
@@ -385,7 +446,7 @@ class IssuesTab(QWidget):
                     QMessageBox.information(self, "Info", "No changes made")
             else:
                 row = self.issuesTable.currentRow()
-                issueId = self.issuesTable.item(row, 0).text()
+                issueId = self.issuesTable.item(row, 1).text()
                 issueId = issueId.lstrip("ISS#")
                 try:
                     query = "DELETE FROM issues WHERE issue_id = ?"
@@ -423,6 +484,7 @@ class IssuesTab(QWidget):
                             query = "SELECT * FROM issues WHERE issue_id=?"
                             facility_record = db.cur.execute(query, (index,)).fetchone()
                             csv_writer.writerow(facility_record)
+
 
                     QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
             except:

@@ -1,16 +1,12 @@
-try:
-   from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton
-   from PySide2.QtWidgets import QRadioButton, QHBoxLayout, QVBoxLayout
-   from PySide2.QtWidgets import QTableWidgetItem, QTableWidget, QGroupBox, QMessageBox
-   from PySide2.QtWidgets import QHeaderView, QTableView, QAbstractItemView, QCheckBox, QFileDialog
-   from PySide2.QtCore import Qt, Slot
 
-except ImportError:
-   from PyQt5.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton
-   from PyQt5.QtWidgets import QRadioButton, QHBoxLayout, QVBoxLayout
-   from PyQt5.QtWidgets import QTableWidgetItem, QTableWidget, QGroupBox, QMessageBox
-   from PyQt5.QtWidgets import QHeaderView, QTableView, QAbstractItemView, QCheckBox, QFileDialog
-   from PyQt5.QtCore import Qt
+from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton
+from PySide2.QtWidgets import QRadioButton, QHBoxLayout, QVBoxLayout
+from PySide2.QtWidgets import QTableWidgetItem, QTableWidget, QGroupBox, QMessageBox
+from PySide2.QtWidgets import QHeaderView, QTableView, QAbstractItemView, QCheckBox, QFileDialog
+from PySide2.QtCore import Qt, Slot
+
+
+
 
 import csv
 import xlsxwriter
@@ -62,22 +58,24 @@ class FacilityTab(QWidget):
         self.facilitiesTable.setSortingEnabled(True)
         self.facilitiesTable.setShowGrid(False)
         self.facilitiesTable.verticalHeader().setDefaultSectionSize(40)
-        self.facilitiesTable.setColumnCount(10)
+        self.facilitiesTable.setColumnCount(11)
         # self.peopleTable.setColumnHidden(0, True)
-        self.facilitiesTable.setHorizontalHeaderItem(0, QTableWidgetItem("ID"))
-        self.facilitiesTable.setHorizontalHeaderItem(1, QTableWidgetItem("Name"))
+        self.facilitiesTable.setHorizontalHeaderItem(0, QTableWidgetItem(""))
+        self.facilitiesTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.facilitiesTable.setHorizontalHeaderItem(1, QTableWidgetItem("ID"))
+        self.facilitiesTable.setHorizontalHeaderItem(2, QTableWidgetItem("Name"))
         self.facilitiesTable.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.facilitiesTable.setHorizontalHeaderItem(2, QTableWidgetItem("Location"))
+        self.facilitiesTable.setHorizontalHeaderItem(3, QTableWidgetItem("Location"))
         self.facilitiesTable.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
-        self.facilitiesTable.setHorizontalHeaderItem(3, QTableWidgetItem("Phone"))
+        self.facilitiesTable.setHorizontalHeaderItem(4, QTableWidgetItem("Phone"))
         self.facilitiesTable.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
-        self.facilitiesTable.setHorizontalHeaderItem(4, QTableWidgetItem("Email"))
+        self.facilitiesTable.setHorizontalHeaderItem(5, QTableWidgetItem("Email"))
         self.facilitiesTable.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
-        self.facilitiesTable.setHorizontalHeaderItem(5, QTableWidgetItem("Supervisor"))
-        self.facilitiesTable.setHorizontalHeaderItem(6, QTableWidgetItem("Ongoing issues"))
-        self.facilitiesTable.setHorizontalHeaderItem(7, QTableWidgetItem("Late issues"))
-        self.facilitiesTable.setHorizontalHeaderItem(8, QTableWidgetItem("Total issues"))
-        self.facilitiesTable.setHorizontalHeaderItem(9, QTableWidgetItem("Total inspections"))
+        self.facilitiesTable.setHorizontalHeaderItem(6, QTableWidgetItem("Supervisor"))
+        self.facilitiesTable.setHorizontalHeaderItem(7, QTableWidgetItem("Ongoing issues"))
+        self.facilitiesTable.setHorizontalHeaderItem(8, QTableWidgetItem("Late issues"))
+        self.facilitiesTable.setHorizontalHeaderItem(9, QTableWidgetItem("Total issues"))
+        self.facilitiesTable.setHorizontalHeaderItem(10, QTableWidgetItem("Total inspections"))
 
         # Double clicking a row opens a window with person details
         self.facilitiesTable.doubleClicked.connect(self.funcSelectedFacility)
@@ -184,13 +182,12 @@ class FacilityTab(QWidget):
             checkbox.setCheckState(Qt.Unchecked)
             qhboxlayout = QHBoxLayout(qwidget)
             qhboxlayout.addWidget(checkbox)
-            qhboxlayout.setAlignment(Qt.AlignRight)
-            qhboxlayout.setContentsMargins(0, 0, 20, 0)
+            qhboxlayout.setAlignment(Qt.AlignCenter)
             self.facilitiesTable.setCellWidget(row_number, 0, qwidget)
-            self.facilitiesTable.setItem(row_number, 1, QTableWidgetItem(str(row_number)))
+            self.facilitiesTable.setItem(row_number, 0, QTableWidgetItem(row_number))
 
-            for column_number, data in enumerate(row_data):
-                if column_number == 0:
+            for column_number, data in enumerate(row_data, start=1):
+                if column_number == 1:
                     self.facilitiesTable.setItem(row_number, column_number, QTableWidgetItem("FCL#" + str(data)))
                 else:
                     self.facilitiesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
@@ -203,7 +200,7 @@ class FacilityTab(QWidget):
         checked_list = []
         for i in range(self.facilitiesTable.rowCount()):
             if self.facilitiesTable.cellWidget(i, 0).findChild(type(QCheckBox())).isChecked():
-                item = self.facilitiesTable.item(i, 0).text()
+                item = self.facilitiesTable.item(i, 1).text()
                 checked_list.append(item.lstrip("FCL#"))
         return checked_list
 
@@ -257,27 +254,43 @@ class FacilityTab(QWidget):
         else:
             # Erase search entry
             self.searchFacilitesEntry.setText("")
-            query = "SELECT * FROM facilities WHERE " \
-                    "facility_id LIKE ? " \
-                    "OR facility_name LIKE ?" \
-                    "OR facility_location LIKE ?" \
-                    "OR facility_phone LIKE ?" \
-                    "OR facility_email LIKE ?" \
-                    "OR facility_supervisor LIKE ?"
-            results = db.cur.execute(query, ('%' + value + '%', '%' + value + '%', '%' + value + '%',
-                                             '%' + value + '%', '%' + value + '%', '%' + value + '%')).fetchall()
-            if results == []:
-                QMessageBox.information(self, "Info", "Nothing was found")
-                self.funcDisplayFacilities()
-            else:
-                for i in reversed(range(self.facilitiesTable.rowCount())):
-                    self.facilitiesTable.removeRow(i)
+            try:
+                query = "SELECT * FROM facilities WHERE " \
+                        "facility_id LIKE ? " \
+                        "OR facility_name LIKE ?" \
+                        "OR facility_location LIKE ?" \
+                        "OR facility_phone LIKE ?" \
+                        "OR facility_email LIKE ?" \
+                        "OR facility_supervisor LIKE ?"
+                results = db.cur.execute(query, ('%' + value + '%', '%' + value + '%', '%' + value + '%',
+                                                 '%' + value + '%', '%' + value + '%', '%' + value + '%')).fetchall()
+                if results == []:
+                    QMessageBox.information(self, "Info", "Nothing was found")
+                    self.funcDisplayFacilities()
+                else:
+                    for i in reversed(range(self.facilitiesTable.rowCount())):
+                        self.facilitiesTable.removeRow(i)
 
-                for row_data in results:
-                    row_number = self.facilitiesTable.rowCount()
-                    self.facilitiesTable.insertRow(row_number)
-                    for column_number, data in enumerate(row_data):
-                        self.facilitiesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+                    for row_data in results:
+                        row_number = self.facilitiesTable.rowCount()
+                        self.facilitiesTable.insertRow(row_number)
+                        # Add checkboxes to the table
+                        qwidget = QWidget()
+                        checkbox = QCheckBox()
+                        checkbox.setCheckState(Qt.Unchecked)
+                        qhboxlayout = QHBoxLayout(qwidget)
+                        qhboxlayout.addWidget(checkbox)
+                        qhboxlayout.setAlignment(Qt.AlignCenter)
+                        self.facilitiesTable.setCellWidget(row_number, 0, qwidget)
+                        self.facilitiesTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+                        for column_number, data in enumerate(row_data, start=1):
+                            if column_number == 1:
+                                self.facilitiesTable.setItem(row_number, column_number,
+                                                         QTableWidgetItem("FCL#" + str(data)))
+                            else:
+                                self.facilitiesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+            except:
+                QMessageBox.information(self, "Info", "Cannot access database")
 
     @Slot()
     def funcFacilitiesToCSV(self):

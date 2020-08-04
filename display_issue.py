@@ -31,7 +31,7 @@ class DisplayIssue(QWidget):
 
     def issueDetails(self):
         row = self.Parent.issuesTable.currentRow()
-        issueId = self.Parent.issuesTable.item(row, 0).text()
+        issueId = self.Parent.issuesTable.item(row, 1).text()
         # Strip the ISS# from the id
         issueId = issueId.lstrip("ISS#")
 
@@ -142,7 +142,7 @@ class DisplayIssue(QWidget):
 
     def updateIssue(self):
         row = self.Parent.issuesTable.currentRow()
-        issueId = self.Parent.issuesTable.item(row, 0).text()
+        issueId = self.Parent.issuesTable.item(row, 1).text()
         issueId = issueId.lstrip("ISS#")
 
         date = self.dateEntry.text()
