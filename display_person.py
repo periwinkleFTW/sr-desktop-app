@@ -1,8 +1,8 @@
 try:
     from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QVBoxLayout, \
-        QFormLayout, QFrame, QMessageBox
+        QFormLayout, QFrame, QMessageBox, QHBoxLayout, QSpacerItem, QSizePolicy
     from PySide2.QtGui import QIcon, QPixmap
-    from PySide2.QtCore import Qt
+    from PySide2.QtCore import Qt, Slot
 except:
     from PyQt.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QComboBox, QVBoxLayout, \
         QFormLayout, QFrame, QMessageBox
@@ -85,11 +85,14 @@ class DisplayPerson(QWidget):
         self.updateBtn.clicked.connect(self.updatePerson)
         self.deleteBtn = QPushButton("Delete")
         self.deleteBtn.clicked.connect(self.Parent.funcDeletePerson)
+        self.cancelBtn = QPushButton("Cancel")
+        self.cancelBtn.clicked.connect(self.closeWindow)
 
     def layouts(self):
         self.mainLayout = QVBoxLayout()
         self.topLayout = QVBoxLayout()
         self.bottomLayout = QFormLayout()
+        self.bottomBtnLayout = QHBoxLayout()
         self.topFrame = QFrame()
         self.bottomFrame = QFrame()
 
@@ -106,8 +109,13 @@ class DisplayPerson(QWidget):
         self.bottomLayout.addRow("Email: ", self.emailEntry)
         self.bottomLayout.addRow("Location: ", self.locationEntry)
         self.bottomLayout.addRow("Employment type: ", self.employmentTypeEntry)
-        self.bottomLayout.addRow("", self.updateBtn)
-        self.bottomLayout.addRow("", self.deleteBtn)
+
+        self.bottomBtnLayout.addWidget(self.cancelBtn)
+        self.bottomBtnLayout.addItem(QSpacerItem(60, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.bottomBtnLayout.addWidget(self.deleteBtn)
+        self.bottomBtnLayout.addWidget(self.updateBtn)
+
+        self.bottomLayout.addRow(self.bottomBtnLayout)
         self.bottomFrame.setLayout(self.bottomLayout)
 
         self.mainLayout.addWidget(self.topFrame)
@@ -115,6 +123,12 @@ class DisplayPerson(QWidget):
 
         self.setLayout(self.mainLayout)
 
+
+    @Slot()
+    def closeWindow(self):
+        self.close()
+
+    @Slot()
     def updatePerson(self):
         row = self.Parent.peopleTable.currentRow()
         personId = self.Parent.peopleTable.item(row, 2).text()

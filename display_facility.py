@@ -1,6 +1,7 @@
-from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QFrame, QFormLayout, QMessageBox
+from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QFrame, \
+    QFormLayout, QMessageBox, QHBoxLayout, QSpacerItem, QSizePolicy
 from PySide2.QtGui import QIcon, QPixmap
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, Slot
 
 from backend import Database
 
@@ -67,11 +68,15 @@ class DisplayFacility(QWidget):
         self.updateBtn.clicked.connect(self.updateFacility)
         self.deleteBtn = QPushButton("Delete")
         self.deleteBtn.clicked.connect(self.Parent.funcDeleteFacility)
+        self.cancelBtn = QPushButton("Cancel")
+        self.cancelBtn.clicked.connect(self.closeWindow)
 
     def layouts(self):
         self.mainLayout = QVBoxLayout()
         self.topLayout = QVBoxLayout()
         self.bottomLayout = QFormLayout()
+        self.bottomBtnLayout = QHBoxLayout()
+
         self.topFrame = QFrame()
         self.bottomFrame = QFrame()
 
@@ -86,8 +91,13 @@ class DisplayFacility(QWidget):
         self.bottomLayout.addRow("Title: ", self.phoneEntry)
         self.bottomLayout.addRow("Phone: ", self.emailEntry)
         self.bottomLayout.addRow("Email: ", self.supervisorEntry)
-        self.bottomLayout.addRow("", self.updateBtn)
-        self.bottomLayout.addRow("", self.deleteBtn)
+
+        self.bottomBtnLayout.addWidget(self.cancelBtn)
+        self.bottomBtnLayout.addItem(QSpacerItem(60, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.bottomBtnLayout.addWidget(self.deleteBtn)
+        self.bottomBtnLayout.addWidget(self.updateBtn)
+
+        self.bottomLayout.addRow(self.bottomBtnLayout)
         self.bottomFrame.setLayout(self.bottomLayout)
 
         self.mainLayout.addWidget(self.topFrame)
@@ -95,6 +105,11 @@ class DisplayFacility(QWidget):
 
         self.setLayout(self.mainLayout)
 
+    @Slot()
+    def closeWindow(self):
+        self.close()
+
+    @Slot()
     def updateFacility(self):
         row = self.Parent.facilitiesTable.currentRow()
         facilityId = self.Parent.facilitiesTable.item(row, 1).text()

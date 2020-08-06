@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QComboBox, QFrame, \
-    QFormLayout, QMessageBox, QDateTimeEdit
+    QFormLayout, QMessageBox, QDateTimeEdit, QHBoxLayout, QSpacerItem, QSizePolicy
 from PySide2.QtGui import QPixmap, QIcon
-from PySide2.QtCore import Qt, QDateTime
+from PySide2.QtCore import Qt, QDateTime, Slot
 
 import backend
 
@@ -105,11 +105,15 @@ class DisplayIssue(QWidget):
         self.updateBtn.clicked.connect(self.updateIssue)
         self.deleteBtn = QPushButton("Delete")
         self.deleteBtn.clicked.connect(self.Parent.funcDeleteIssue)
+        self.cancelBtn = QPushButton("Cancel")
+        self.cancelBtn.clicked.connect(self.closeWindow)
 
     def layouts(self):
         self.mainLayout = QVBoxLayout()
         self.topLayout = QVBoxLayout()
         self.bottomLayout = QFormLayout()
+        self.bottomBtnLayout = QHBoxLayout()
+
         self.topFrame = QFrame()
         self.bottomFrame = QFrame()
 
@@ -133,8 +137,13 @@ class DisplayIssue(QWidget):
         self.bottomLayout.addRow("Inspected subcontractor: ", self.inspectedSubcontrEntry)
         self.bottomLayout.addRow("Deadline: ", self.deadlineEntry)
         self.bottomLayout.addRow("Status: ", self.statusEntry)
-        self.bottomLayout.addRow("", self.updateBtn)
-        self.bottomLayout.addRow("", self.deleteBtn)
+
+        self.bottomBtnLayout.addWidget(self.cancelBtn)
+        self.bottomBtnLayout.addItem(QSpacerItem(60, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.bottomBtnLayout.addWidget(self.deleteBtn)
+        self.bottomBtnLayout.addWidget(self.updateBtn)
+
+        self.bottomLayout.addRow(self.bottomBtnLayout)
         self.bottomFrame.setLayout(self.bottomLayout)
 
         self.mainLayout.addWidget(self.topFrame)
@@ -142,6 +151,11 @@ class DisplayIssue(QWidget):
 
         self.setLayout(self.mainLayout)
 
+    @Slot()
+    def closeWindow(self):
+        self.close()
+
+    @Slot()
     def updateIssue(self):
         row = self.Parent.issuesTable.currentRow()
         issueId = self.Parent.issuesTable.item(row, 2).text()

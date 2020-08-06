@@ -419,7 +419,7 @@ class IssuesTab(QWidget):
                 QMessageBox.information(self, "Info", "Something went wrong")
         else:
             row = self.issuesTable.currentRow()
-            issueId = self.issuesTable.item(row, 1).text()
+            issueId = self.issuesTable.item(row, 2).text()
             issueId = issueId.lstrip("ISS#")
 
             try:
