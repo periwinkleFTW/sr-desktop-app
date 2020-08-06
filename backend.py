@@ -51,7 +51,9 @@ class Database:
                                     "issue_deadline DATETIME, " \
                                     "status TEXT DEFAULT 'Open', " \
                                     "created_on DATETIME, " \
-                                    "closed_on DATETIME" \
+                                    "closed_on DATETIME," \
+                                    "photo_original_path TEXT," \
+                                    "photo_resized_path TEXT" \
                                     ")"
 
         if self.conn is not None:

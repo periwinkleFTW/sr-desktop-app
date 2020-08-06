@@ -2,7 +2,8 @@
 from PySide2.QtCore import Qt, Slot
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
     QTableWidgetItem, QTableWidget, QGroupBox, QCheckBox, QAbstractItemView, QTableView, QMessageBox, \
-    QFileDialog, QHeaderView
+    QFileDialog, QHeaderView, QSpacerItem, QSizePolicy
+from PySide2.QtGui import QPixmap
 
 import datetime
 import csv
@@ -39,19 +40,21 @@ class IssuesTab(QWidget):
     def widgets(self):
         # Issues widgets ###########################################################
         # Top layout (search issues) widgets
-        self.searchIssuesText = QLabel("Search issues: ")
+        self.searchIssuesText = QLabel("Search: ")
         self.searchIssuesEntry = QLineEdit()
-        self.searchIssuesEntry.setPlaceholderText("Type here..")
+        self.searchIssuesEntry.setPlaceholderText("Search issues..")
         self.searchIssuesBtn = QPushButton("Search")
         self.searchIssuesBtn.setObjectName("btn_searchIssues")
         self.searchIssuesBtn.clicked.connect(self.funcSearchIssues)
+        self.refreshIssuesBtn = QPushButton("Refresh")
+        self.refreshIssuesBtn.clicked.connect(self.funcDisplayIssues)
 
         # Middle layout (list issues) widgets with radio buttons
         self.allIssuesRadioBtn = QRadioButton("All issues")
         self.ongoingIssuesRadioBtn = QRadioButton("Pending issues")
         self.lateIssuesRadioBtn = QRadioButton("Late issues")
         self.closedIssuesRadioBtn = QRadioButton("Closed issues")
-        self.listIssuesBtn = QPushButton("List issues")
+        self.listIssuesBtn = QPushButton("List")
         self.listIssuesBtn.setObjectName("btn_listIssues")
         self.listIssuesBtn.clicked.connect(self.funcListIssues)
 
@@ -61,41 +64,43 @@ class IssuesTab(QWidget):
         self.issuesTable.verticalHeader().hide()
         self.issuesTable.setSortingEnabled(True)
         self.issuesTable.setShowGrid(False)
-        self.issuesTable.verticalHeader().setDefaultSectionSize(40)
-        self.issuesTable.setColumnCount(12)
+        self.issuesTable.verticalHeader().setDefaultSectionSize(90)
+        self.issuesTable.setColumnCount(13)
 
         # self.issuesTable.setColumnHidden(0, True)
         self.issuesTable.setHorizontalHeaderItem(0, QTableWidgetItem(""))
         self.issuesTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        self.issuesTable.setHorizontalHeaderItem(1, QTableWidgetItem("ID"))
-        self.issuesTable.setHorizontalHeaderItem(2, QTableWidgetItem("Date"))
-        self.issuesTable.setHorizontalHeaderItem(3, QTableWidgetItem("Priority"))
-        self.issuesTable.setHorizontalHeaderItem(4, QTableWidgetItem("Observer"))
-        self.issuesTable.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
-        self.issuesTable.setHorizontalHeaderItem(5, QTableWidgetItem("Inspection name"))
-        self.issuesTable.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
-        self.issuesTable.setHorizontalHeaderItem(6, QTableWidgetItem("Theme"))
+        self.issuesTable.setHorizontalHeaderItem(1, QTableWidgetItem("Status"))
+        self.issuesTable.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.issuesTable.setHorizontalHeaderItem(2, QTableWidgetItem("ID"))
+        self.issuesTable.setHorizontalHeaderItem(3, QTableWidgetItem("Date"))
+        self.issuesTable.setHorizontalHeaderItem(4, QTableWidgetItem("Priority"))
+        self.issuesTable.setHorizontalHeaderItem(5, QTableWidgetItem("Observer"))
         self.issuesTable.horizontalHeader().setSectionResizeMode(5, QHeaderView.Stretch)
-        self.issuesTable.setHorizontalHeaderItem(7, QTableWidgetItem("Facility"))
-        self.issuesTable.setHorizontalHeaderItem(8, QTableWidgetItem("Insp. Dept"))
-        self.issuesTable.setHorizontalHeaderItem(9, QTableWidgetItem("Deadline"))
-        self.issuesTable.setHorizontalHeaderItem(10, QTableWidgetItem("Status"))
-        self.issuesTable.setHorizontalHeaderItem(11, QTableWidgetItem("Created on"))
+        self.issuesTable.setHorizontalHeaderItem(6, QTableWidgetItem("Inspection name"))
+        self.issuesTable.horizontalHeader().setSectionResizeMode(6, QHeaderView.Stretch)
+        self.issuesTable.setHorizontalHeaderItem(7, QTableWidgetItem("Theme"))
+        self.issuesTable.horizontalHeader().setSectionResizeMode(7, QHeaderView.Stretch)
+        self.issuesTable.setHorizontalHeaderItem(8, QTableWidgetItem("Facility"))
+        self.issuesTable.setHorizontalHeaderItem(9, QTableWidgetItem("Insp. Dept"))
+        self.issuesTable.setHorizontalHeaderItem(10, QTableWidgetItem("Deadline"))
+        self.issuesTable.setHorizontalHeaderItem(11, QTableWidgetItem("Status"))
+        self.issuesTable.setHorizontalHeaderItem(12, QTableWidgetItem("Created on"))
 
         # Double clicking a row opens a window with issue details
         self.issuesTable.doubleClicked.connect(self.funcSelectedIssue)
 
         # Buttons for actions on selected issues
-        self.addIssue = QPushButton("Add issue")
+        self.addIssue = QPushButton("Add")
         self.addIssue.setObjectName("btn_addIssue")
         self.addIssue.clicked.connect(self.funcAddIssue)
-        self.viewIssue = QPushButton("View/Edit issue")
+        self.viewIssue = QPushButton("View/Edit")
         self.viewIssue.setObjectName("btn_viewIssue")
         self.viewIssue.clicked.connect(self.funcSelectedIssue)
-        self.closeIssueBtn = QPushButton("Close issue")
+        self.closeIssueBtn = QPushButton("Close")
         self.closeIssueBtn.setObjectName("btn_closeIssue")
         self.closeIssueBtn.clicked.connect(self.funcCloseIssue)
-        self.deleteIssue = QPushButton("Delete issue")
+        self.deleteIssue = QPushButton("Delete")
         self.deleteIssue.setObjectName("btn_deleteIssue")
         self.deleteIssue.clicked.connect(self.funcDeleteIssue)
         self.exportIssuesCSVBtn = QPushButton("Export CSV")
@@ -143,6 +148,8 @@ class IssuesTab(QWidget):
         self.issuesTopLeftLayout.addWidget(self.searchIssuesText, 10)
         self.issuesTopLeftLayout.addWidget(self.searchIssuesEntry, 30)
         self.issuesTopLeftLayout.addWidget(self.searchIssuesBtn, 10)
+        self.issuesTopLeftLayout.addItem(QSpacerItem(70, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.issuesTopLeftLayout.addWidget(self.refreshIssuesBtn, 10)
         self.issuesTopLeftGroupBox.setLayout(self.issuesTopLeftLayout)
 
         # layout (list box) widgets
@@ -153,8 +160,8 @@ class IssuesTab(QWidget):
         self.issuesTopRightLayout.addWidget(self.listIssuesBtn)
         self.issuesTopRightGroupBox.setLayout(self.issuesTopRightLayout)
 
-        self.issuesMainTopLayout.addWidget(self.issuesTopLeftGroupBox)
-        self.issuesMainTopLayout.addWidget(self.issuesTopRightGroupBox)
+        self.issuesMainTopLayout.addWidget(self.issuesTopLeftGroupBox, 60)
+        self.issuesMainTopLayout.addWidget(self.issuesTopRightGroupBox, 40)
 
         # Bottom layout (table with facilities) widgets
         # Bottom left layout with table
@@ -202,9 +209,18 @@ class IssuesTab(QWidget):
             qhboxlayout.setAlignment(Qt.AlignCenter)
             self.issuesTable.setCellWidget(row_number, 0, qwidget)
             self.issuesTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+            # Add status photos_thumbnails to the table
+            thumbWidget = QWidget()
+            pic = QPixmap('assets/icons/issue_icons/issue_closed_icon.png')
+            thumbLabel = QLabel()
+            thumbLabel.setPixmap(pic)
+            thumbLayout = QHBoxLayout(thumbWidget)
+            thumbLayout.addWidget(thumbLabel)
+            self.issuesTable.setCellWidget(row_number, 1, thumbWidget)
+            self.issuesTable.setItem(row_number, 0, QTableWidgetItem(row_number))
 
-            for column_number, data in enumerate(row_data, start=1):
-                if column_number == 1:
+            for column_number, data in enumerate(row_data, start=2):
+                if column_number == 2:
                     self.issuesTable.setItem(row_number, column_number, QTableWidgetItem("ISS#" + str(data)))
                 else:
                     self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))

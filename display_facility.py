@@ -12,7 +12,7 @@ class DisplayFacility(QWidget):
         QWidget.__init__(self)
         self.setWindowTitle("View facility")
         self.setWindowIcon(QIcon("assets/icons/logo-dark.png"))
-        self.setGeometry(450, 150, 750, 650)
+        self.setGeometry(450, 150, 450, 650)
 
         self.Parent = parent
 
@@ -27,7 +27,7 @@ class DisplayFacility(QWidget):
     def facilityDetails(self):
 
         row = self.Parent.facilitiesTable.currentRow()
-        facilityId = self.Parent.facilitiesTable.item(row, 0).text()
+        facilityId = self.Parent.facilitiesTable.item(row, 1).text()
         # Strip FCL# from the id
         facilityId = facilityId.lstrip("FCL#")
 

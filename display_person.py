@@ -18,7 +18,7 @@ class DisplayPerson(QWidget):
         QWidget.__init__(self)
         self.setWindowTitle("View person")
         self.setWindowIcon(QIcon("assets/icons/logo-dark.png"))
-        self.setGeometry(450, 150, 750, 650)
+        self.setGeometry(450, 150, 450, 650)
 
         self.Parent = parent
 
@@ -50,11 +50,13 @@ class DisplayPerson(QWidget):
         self.email = person[5]
         self.location = person[6]
         self.emplType = person[7]
+        self.thumbnail = person[9]
 
     def widgets(self):
         # Top layout widgets
         self.personImg = QLabel()
-        self.img = QPixmap('assets/icons/logo-dark.png')
+        self.img = QPixmap(self.thumbnail)
+        self.img = self.img.scaled(300, 300, Qt.KeepAspectRatio, Qt.FastTransformation)
         self.personImg.setPixmap(self.img)
         self.personImg.setAlignment(Qt.AlignCenter)
         self.titleText = QLabel("Display person")

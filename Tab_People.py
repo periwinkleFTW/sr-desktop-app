@@ -1,7 +1,7 @@
 
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
     QTableWidgetItem, QTableWidget, QGroupBox, QHeaderView, QAbstractItemView, QTableView, QCheckBox, \
-    QMessageBox, QFileDialog
+    QMessageBox, QFileDialog, QSpacerItem, QSizePolicy
 from PySide2.QtCore import Qt, Slot
 from PySide2.QtGui import QPixmap
 
@@ -40,18 +40,20 @@ class PeopleTab(QWidget):
     def widgets(self):
         # People widgets ###########################################################
         # Top layout (search people) widgets
-        self.searchPeopleText = QLabel("Search people: ")
+        self.searchPeopleText = QLabel("Search: ")
         self.searchPeopleEntry = QLineEdit()
         self.searchPeopleEntry.setPlaceholderText("Search people..")
         self.searchPeopleBtn = QPushButton("Search")
         self.searchPeopleBtn.clicked.connect(self.searchPeople)
+        self.refreshPeopleBtn = QPushButton("Refresh")
+        self.refreshPeopleBtn.clicked.connect(self.funcDisplayPeople)
 
         # Middle layout (list people) widgets with radio buttons
         self.allPeopleRadioBtn = QRadioButton("All people")
         self.employeesPeopleRadioBtn = QRadioButton("Employees")
         self.contractorsPeopleRadioBtn = QRadioButton("Contractors")
         self.subcontractorsPeopleRadioBtn = QRadioButton("Subcontractors")
-        self.listPeopleBtn = QPushButton("List people")
+        self.listPeopleBtn = QPushButton("List")
         self.listPeopleBtn.clicked.connect(self.funcListPeople)
 
         # Bottom layout widget, a table showing people
@@ -85,11 +87,11 @@ class PeopleTab(QWidget):
         self.peopleTable.doubleClicked.connect(self.selectedPerson)
 
         # Buttons for actions on selected people
-        self.addPerson = QPushButton("Add person")
+        self.addPerson = QPushButton("Add")
         self.addPerson.clicked.connect(self.funcAddPerson)
-        self.viewPerson = QPushButton("View/Edit person")
+        self.viewPerson = QPushButton("View/Edit")
         self.viewPerson.clicked.connect(self.selectedPerson)
-        self.deletePerson = QPushButton("Delete person")
+        self.deletePerson = QPushButton("Delete")
         self.deletePerson.clicked.connect(self.funcDeletePerson)
         self.exportPeopleCSVBtn = QPushButton("Export CSV")
         self.exportPeopleCSVBtn.clicked.connect(self.funcPeopleToCSV)
@@ -133,6 +135,8 @@ class PeopleTab(QWidget):
         self.peopleTopLeftLayout.addWidget(self.searchPeopleText, 10)
         self.peopleTopLeftLayout.addWidget(self.searchPeopleEntry, 30)
         self.peopleTopLeftLayout.addWidget(self.searchPeopleBtn, 10)
+        self.peopleTopLeftLayout.addItem(QSpacerItem(70, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.peopleTopLeftLayout.addWidget(self.refreshPeopleBtn, 10)
         self.peopleTopLeftGroupBox.setLayout(self.peopleTopLeftLayout)
 
         # Middle layout (list box) widgets
@@ -143,8 +147,8 @@ class PeopleTab(QWidget):
         self.peopleTopRightLayout.addWidget(self.listPeopleBtn)
         self.peopleTopRightGroupBox.setLayout(self.peopleTopRightLayout)
 
-        self.peopleMainTopLayout.addWidget(self.peopleTopLeftGroupBox)
-        self.peopleMainTopLayout.addWidget(self.peopleTopRightGroupBox)
+        self.peopleMainTopLayout.addWidget(self.peopleTopLeftGroupBox, 60)
+        self.peopleMainTopLayout.addWidget(self.peopleTopRightGroupBox, 40)
 
         # Bottom layout (table with issues) widgets
         # Bottom left layout with table
@@ -193,7 +197,7 @@ class PeopleTab(QWidget):
             hBoxLayout.setAlignment(Qt.AlignCenter)
             self.peopleTable.setCellWidget(row_number, 0, widget)
             self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
-            # Add photo thumbnails to the table
+            # Add photo photos_thumbnails to the table
             thumbWidget = QWidget()
             pic = QPixmap(str(row_data[10]))
             thumbLabel = QLabel()
@@ -293,10 +297,10 @@ class PeopleTab(QWidget):
                     hBoxLayout.setAlignment(Qt.AlignCenter)
                     self.peopleTable.setCellWidget(row_number, 0, widget)
                     self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
-                    # Add photo thumbnails to the table
+                    # Add photo photos_thumbnails to the table
                     thumbWidget = QWidget()
                     pic = QPixmap(
-                        "./assets/media/people-media/thumbnails/01Aug2020_18h01mtrtgzteuzuspxrp_thumbnail.png")
+                        "assets/media/people-media/photos_thumbnails/01Aug2020_18h01mtrtgzteuzuspxrp_thumbnail.png")
                     thumbLabel = QLabel()
                     thumbLabel.setPixmap(pic)
                     thumbLayout = QHBoxLayout(thumbWidget)
@@ -331,10 +335,10 @@ class PeopleTab(QWidget):
                     hBoxLayout.setAlignment(Qt.AlignCenter)
                     self.peopleTable.setCellWidget(row_number, 0, widget)
                     self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
-                    # Add photo thumbnails to the table
+                    # Add photo photos_thumbnails to the table
                     thumbWidget = QWidget()
                     pic = QPixmap(
-                        "./assets/media/people-media/thumbnails/01Aug2020_18h01mtrtgzteuzuspxrp_thumbnail.png")
+                        "assets/media/people-media/photos_thumbnails/01Aug2020_18h01mtrtgzteuzuspxrp_thumbnail.png")
                     thumbLabel = QLabel()
                     thumbLabel.setPixmap(pic)
                     thumbLayout = QHBoxLayout(thumbWidget)
@@ -369,10 +373,10 @@ class PeopleTab(QWidget):
                     hBoxLayout.setAlignment(Qt.AlignCenter)
                     self.peopleTable.setCellWidget(row_number, 0, widget)
                     self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
-                    # Add photo thumbnails to the table
+                    # Add photo photos_thumbnails to the table
                     thumbWidget = QWidget()
                     pic = QPixmap(
-                        "./assets/media/people-media/thumbnails/01Aug2020_18h01mtrtgzteuzuspxrp_thumbnail.png")
+                        "assets/media/people-media/photos_thumbnails/01Aug2020_18h01mtrtgzteuzuspxrp_thumbnail.png")
                     thumbLabel = QLabel()
                     thumbLabel.setPixmap(pic)
                     thumbLayout = QHBoxLayout(thumbWidget)
@@ -429,10 +433,10 @@ class PeopleTab(QWidget):
                         qhboxlayout.setAlignment(Qt.AlignCenter)
                         self.peopleTable.setCellWidget(row_number, 0, qwidget)
                         self.peopleTable.setItem(row_number, 0, QTableWidgetItem(row_number))
-                        # Add photo thumbnails to the table
+                        # Add photo photos_thumbnails to the table
                         thumbWidget = QWidget()
                         pic = QPixmap(
-                            "./assets/media/people-media/thumbnails/01Aug2020_18h01mtrtgzteuzuspxrp_thumbnail.png")
+                            "assets/media/people-media/photos_thumbnails/01Aug2020_18h01mtrtgzteuzuspxrp_thumbnail.png")
                         thumbLabel = QLabel()
                         thumbLabel.setPixmap(pic)
                         thumbLayout = QHBoxLayout(thumbWidget)

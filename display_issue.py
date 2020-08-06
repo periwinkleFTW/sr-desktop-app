@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QComboBox, QFrame, \
-    QFormLayout, QMessageBox
+    QFormLayout, QMessageBox, QDateTimeEdit
 from PySide2.QtGui import QPixmap, QIcon
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, QDateTime
 
 import backend
 
@@ -15,7 +15,7 @@ class DisplayIssue(QWidget):
         QWidget.__init__(self)
         self.setWindowTitle("View issue")
         self.setWindowIcon(QIcon("assets/icons/logo-dark.png"))
-        self.setGeometry(450, 150, 750, 650)
+        self.setGeometry(450, 150, 450, 650)
 
         self.Parent = parent
 
@@ -31,7 +31,7 @@ class DisplayIssue(QWidget):
 
     def issueDetails(self):
         row = self.Parent.issuesTable.currentRow()
-        issueId = self.Parent.issuesTable.item(row, 1).text()
+        issueId = self.Parent.issuesTable.item(row, 2).text()
         # Strip the ISS# from the id
         issueId = issueId.lstrip("ISS#")
 
@@ -66,8 +66,10 @@ class DisplayIssue(QWidget):
         self.titleText.setAlignment(Qt.AlignCenter)
         # Bottom layout widgets
         self.idEntry = QLabel(str(self.id))
-        self.dateEntry = QLineEdit()
-        self.dateEntry.setText(self.date)
+
+        self.dateEntry = QDateTimeEdit(calendarPopup=True)
+        self.dateEntry.setDateTime(QDateTime.fromString(self.date, "yyyy-MM-dd h:mm AP"))
+
         self.priorityEntry = QLineEdit()
         self.priorityEntry.setText(self.priority)
         self.observerEntry = QLineEdit()
@@ -92,8 +94,8 @@ class DisplayIssue(QWidget):
         self.inspectedSubcontrEntry.setText(self.inspectedSubcontr)
         self.statusEntry = QComboBox()
         self.statusEntry.setCurrentText(self.status)
-        self.deadlineEntry = QLineEdit()
-        self.deadlineEntry.setText(self.deadline)
+        self.deadlineEntry = QDateTimeEdit(calendarPopup=True)
+        self.deadlineEntry.setDateTime(QDateTime.fromString(self.deadline, "yyyy-MM-dd h:mm AP"))
 
         statusList = ["Open", "Closed"]
         self.statusEntry = QComboBox()
@@ -142,7 +144,7 @@ class DisplayIssue(QWidget):
 
     def updateIssue(self):
         row = self.Parent.issuesTable.currentRow()
-        issueId = self.Parent.issuesTable.item(row, 1).text()
+        issueId = self.Parent.issuesTable.item(row, 2).text()
         issueId = issueId.lstrip("ISS#")
 
         date = self.dateEntry.text()

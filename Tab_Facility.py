@@ -1,7 +1,7 @@
 
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton
 from PySide2.QtWidgets import QRadioButton, QHBoxLayout, QVBoxLayout
-from PySide2.QtWidgets import QTableWidgetItem, QTableWidget, QGroupBox, QMessageBox
+from PySide2.QtWidgets import QTableWidgetItem, QTableWidget, QGroupBox, QMessageBox, QSpacerItem, QSizePolicy
 from PySide2.QtWidgets import QHeaderView, QTableView, QAbstractItemView, QCheckBox, QFileDialog
 from PySide2.QtCore import Qt, Slot
 
@@ -40,17 +40,19 @@ class FacilityTab(QWidget):
     def widgets(self):
         # Facilities widgets ###########################################################
         # Top layout (search facilities) widgets
-        self.searchFacilitiesText = QLabel("Search facilities: ")
+        self.searchFacilitiesText = QLabel("Search: ")
         self.searchFacilitesEntry = QLineEdit()
         self.searchFacilitesEntry.setPlaceholderText("Search facilities..")
         self.searchFacilitiesBtn = QPushButton("Search")
         self.searchFacilitiesBtn.clicked.connect(self.funcSearchFacilities)
+        self.refreshFacilitiesBtn = QPushButton("Refresh")
+        self.refreshFacilitiesBtn.clicked.connect(self.funcDisplayFacilities)
 
         # Middle layout (list people) widgets with radio buttons
         self.allFacilitiesRadioBtn = QRadioButton("All facilities")
-        self.withOngoingIssuesFacilitiesRadioBtn = QRadioButton("With ongoing issues")
+        self.withOngoingIssuesFacilitiesRadioBtn = QRadioButton("With pending issues")
         self.withLateIssuesRadioBtn = QRadioButton("With late issues")
-        self.listFacilitiesBtn = QPushButton("List facilities")
+        self.listFacilitiesBtn = QPushButton("List")
 
         # Bottom layout widget, a table showing people
         self.facilitiesTable = QTableWidget()
@@ -81,11 +83,11 @@ class FacilityTab(QWidget):
         self.facilitiesTable.doubleClicked.connect(self.funcSelectedFacility)
 
         # Buttons for actions on selected facilities
-        self.addFacility = QPushButton("Add facility")
+        self.addFacility = QPushButton("Add")
         self.addFacility.clicked.connect(self.funcAddFacility)
-        self.viewFacility = QPushButton("View/Edit facility")
+        self.viewFacility = QPushButton("View/Edit")
         self.viewFacility.clicked.connect(self.funcSelectedFacility)
-        self.deleteFacility = QPushButton("Delete facility")
+        self.deleteFacility = QPushButton("Delete")
         self.deleteFacility.clicked.connect(self.funcDeleteFacility)
         self.exportFacilitiesCSVBtn = QPushButton("Export CSV")
         self.exportFacilitiesCSVBtn.clicked.connect(self.funcFacilitiesToCSV)
@@ -124,6 +126,8 @@ class FacilityTab(QWidget):
         self.facilitiesTopLeftLayout.addWidget(self.searchFacilitiesText, 10)
         self.facilitiesTopLeftLayout.addWidget(self.searchFacilitesEntry, 30)
         self.facilitiesTopLeftLayout.addWidget(self.searchFacilitiesBtn, 10)
+        self.facilitiesTopLeftLayout.addItem(QSpacerItem(70, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        self.facilitiesTopLeftLayout.addWidget(self.refreshFacilitiesBtn, 10)
         self.facilitiesTopLeftGroupBox.setLayout(self.facilitiesTopLeftLayout)
 
         # layout (list box) widgets
@@ -133,8 +137,8 @@ class FacilityTab(QWidget):
         self.facilitiesTopRightLayout.addWidget(self.listFacilitiesBtn)
         self.facilitiesTopRightGroupBox.setLayout(self.facilitiesTopRightLayout)
 
-        self.facilitiesMainTopLayout.addWidget(self.facilitiesTopLeftGroupBox)
-        self.facilitiesMainTopLayout.addWidget(self.facilitiesTopRightGroupBox)
+        self.facilitiesMainTopLayout.addWidget(self.facilitiesTopLeftGroupBox, 60)
+        self.facilitiesMainTopLayout.addWidget(self.facilitiesTopRightGroupBox, 40)
 
         # Bottom layout (table with facilities) widgets
         # Bottom left layout with table

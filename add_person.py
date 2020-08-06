@@ -3,7 +3,7 @@ import string
 from datetime import datetime
 from os import path as osPath
 from shutil import copy2 as ShCopy2
-from PIL import Image, ImageDraw, ImageFilter, ImageOps
+from PIL import Image, ImageDraw, ImageFilter
 
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QComboBox, QFrame, QFormLayout, QMessageBox, QSpacerItem, QSizePolicy, QFileDialog
@@ -148,13 +148,11 @@ class AddPerson(QWidget):
                         "person_email, person_location, person_empl_type, photo_original_path, photo_resized_path, " \
                         "thumbnail_path) " \
                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-                print("before exec")
+
                 db.cur.execute(query, (firstName, lastName, title, phone, email, location, emplType,
                                        self.attachedFilePath, self.attachedResizedFilePath, self.attachedThumbnailPath))
-                print("before commit")
 
                 db.conn.commit()
-                print("after commit")
 
                 self.Parent.funcDisplayPeople()
                 QMessageBox.information(self, "Info", "Member has been added")
@@ -177,9 +175,9 @@ class AddPerson(QWidget):
                 randomSuffix = "".join(random.choice(string.ascii_lowercase) for i in range(15))
                 self.attachedFilePath = "./assets/media/people-media/photos/" + \
                                         "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + fileExt
-                self.attachedResizedFilePath = "./assets/media/people-media/resized_photos/" + \
+                self.attachedResizedFilePath = "./assets/media/people-media/photos_resized/" + \
                                                "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + "_resized" + fileExt
-                self.attachedThumbnailPath = "./assets/media/people-media/thumbnails/" + \
+                self.attachedThumbnailPath = "./assets/media/people-media/photos_thumbnails/" + \
                                              "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + "_thumbnail" + ".png"
 
                 QMessageBox.information(self, "Info", "File attached successfully")
