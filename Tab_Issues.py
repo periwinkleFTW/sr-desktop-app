@@ -1,4 +1,3 @@
-
 from PySide2.QtCore import Qt, Slot
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QRadioButton, QHBoxLayout, QVBoxLayout, \
     QTableWidgetItem, QTableWidget, QGroupBox, QCheckBox, QAbstractItemView, QTableView, QMessageBox, \
@@ -67,7 +66,6 @@ class IssuesTab(QWidget):
         self.issuesTable.verticalHeader().setDefaultSectionSize(90)
         self.issuesTable.setColumnCount(13)
 
-        # self.issuesTable.setColumnHidden(0, True)
         self.issuesTable.setHorizontalHeaderItem(0, QTableWidgetItem(""))
         self.issuesTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.issuesTable.setHorizontalHeaderItem(1, QTableWidgetItem("Status"))
@@ -193,9 +191,19 @@ class IssuesTab(QWidget):
         for i in reversed(range(self.issuesTable.rowCount())):
             self.issuesTable.removeRow(i)
 
-        issues = db.cur.execute("SELECT issue_id, issue_date, issue_priority, issue_observer,"
-                                "issue_inspection, issue_theme, issue_facility, issue_insp_dept,"
-                                "issue_deadline, status, created_on FROM issues")
+        issues = db.cur.execute("SELECT "
+                                "issue_id, "
+                                "issue_date, "
+                                "issue_priority, "
+                                "issue_observer,"
+                                "issue_inspection, "
+                                "issue_theme, "
+                                "issue_facility, "
+                                "issue_insp_dept,"
+                                "issue_deadline, "
+                                "status, "
+                                "created_on "
+                                "FROM issues")
 
         for row_data in issues:
             row_number = self.issuesTable.rowCount()
@@ -210,18 +218,45 @@ class IssuesTab(QWidget):
             self.issuesTable.setCellWidget(row_number, 0, qwidget)
             self.issuesTable.setItem(row_number, 0, QTableWidgetItem(row_number))
             # Add status photos_thumbnails to the table
-            thumbWidget = QWidget()
-            pic = QPixmap('assets/icons/issue_icons/issue_closed_icon.png')
-            thumbLabel = QLabel()
-            thumbLabel.setPixmap(pic)
-            thumbLayout = QHBoxLayout(thumbWidget)
-            thumbLayout.addWidget(thumbLabel)
-            self.issuesTable.setCellWidget(row_number, 1, thumbWidget)
+            thumbStatusWidget = QWidget()
+            # Assign proper status thumbnails based on deadline
+            if row_data[9] == "Closed":
+                pic = QPixmap('assets/icons/issue_icons/issue_closed_icon.png')
+            elif row_data[8] > str(datetime.datetime.now()):
+                pic = QPixmap('assets/icons/issue_icons/issue_pending_icon.png')
+            elif row_data[8] < str(datetime.datetime.now()):
+                pic = QPixmap('assets/icons/issue_icons/issue_late_icon.png')
+
+            thumbStatusLabel = QLabel()
+            thumbStatusLabel.setPixmap(pic)
+            thumbStatusLayout = QHBoxLayout(thumbStatusWidget)
+            thumbStatusLayout.addWidget(thumbStatusLabel)
+            self.issuesTable.setCellWidget(row_number, 1, thumbStatusWidget)
+            self.issuesTable.setItem(row_number, 0, QTableWidgetItem(row_number))
+
+            thumbPriorityWidget = QWidget()
+            # Assign priority thumbnails
+            if row_data[2] == "Low":
+                pic = QPixmap('assets/icons/issue_priority_icons/low_priority.png')
+            elif row_data[2] == "Medium":
+                pic = QPixmap('assets/icons/issue_priority_icons/medium_priority.png')
+            elif row_data[2] == "High":
+                pic = QPixmap('assets/icons/issue_priority_icons/high_priority.png')
+
+            thumbPriorityLabel = QLabel()
+            thumbPriorityLabel.setAlignment(Qt.AlignCenter)
+            thumbPriorityLabel.setPixmap(pic)
+            thumbPriorityLayout = QHBoxLayout(thumbPriorityWidget)
+            thumbPriorityLayout.addWidget(thumbPriorityLabel)
+            self.issuesTable.setCellWidget(row_number, 4, thumbPriorityWidget)
             self.issuesTable.setItem(row_number, 0, QTableWidgetItem(row_number))
 
             for column_number, data in enumerate(row_data, start=2):
                 if column_number == 2:
                     self.issuesTable.setItem(row_number, column_number, QTableWidgetItem("ISS#" + str(data)))
+                elif column_number == 4:
+                    # Do not print priority in the table
+                    self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(""))
                 else:
                     self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
 
@@ -239,9 +274,10 @@ class IssuesTab(QWidget):
         checked_list = []
         for i in range(self.issuesTable.rowCount()):
             if self.issuesTable.cellWidget(i, 0).findChild(type(QCheckBox())).isChecked():
-                item = self.issuesTable.item(i, 1).text()
+                item = self.issuesTable.item(i, 2).text()
                 checked_list.append(item.lstrip("ISS#"))
         return checked_list
+
 
     @Slot()
     def funcSelectedIssue(self):
@@ -272,10 +308,14 @@ class IssuesTab(QWidget):
                         "OR issue_insp_contr LIKE ?" \
                         "OR issue_insp_subcontr LIKE ?" \
                         "OR issue_deadline LIKE ?"
-                results = db.cur.execute(query, ('%' + value + '%', '%' + value + '%', '%' + value + '%', '%' + value + '%',
-                                                 '%' + value + '%', '%' + value + '%', '%' + value + '%', '%' + value + '%',
-                                                 '%' + value + '%', '%' + value + '%', '%' + value + '%', '%' + value + '%',
-                                                 '%' + value + '%', '%' + value + '%',)).fetchall()
+                results = db.cur.execute(query,
+                                         ('%' + value + '%', '%' + value + '%',
+                                          '%' + value + '%', '%' + value + '%',
+                                          '%' + value + '%', '%' + value + '%',
+                                          '%' + value + '%', '%' + value + '%',
+                                          '%' + value + '%', '%' + value + '%',
+                                          '%' + value + '%', '%' + value + '%',
+                                          '%' + value + '%', '%' + value + '%',)).fetchall()
                 if results == []:
                     QMessageBox.information(self, "Info", "Nothing was found")
                     self.funcDisplayIssues()
@@ -310,9 +350,19 @@ class IssuesTab(QWidget):
             if self.allIssuesRadioBtn.isChecked():
                 self.funcDisplayIssues()
             elif self.ongoingIssuesRadioBtn.isChecked():
-                query = "SELECT issue_id, issue_date, issue_priority, issue_observer," \
-                                "issue_inspection, issue_theme, issue_facility, issue_insp_dept," \
-                                "issue_deadline, status, created_on FROM issues WHERE status='Open' " \
+                query = "SELECT " \
+                        "issue_id, " \
+                        "issue_date, " \
+                        "issue_priority, " \
+                        "issue_observer," \
+                        "issue_inspection, " \
+                        "issue_theme, " \
+                        "issue_facility, " \
+                        "issue_insp_dept," \
+                        "issue_deadline, " \
+                        "status, " \
+                        "created_on " \
+                        "FROM issues WHERE status='Open' " \
                         "AND issue_deadline > DATETIME('now')"
                 issues = db.cur.execute(query).fetchall()
 
@@ -338,9 +388,19 @@ class IssuesTab(QWidget):
                         else:
                             self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
             elif self.lateIssuesRadioBtn.isChecked():
-                query = "SELECT issue_id, issue_date, issue_priority, issue_observer," \
-                                "issue_inspection, issue_theme, issue_facility, issue_insp_dept," \
-                                "issue_deadline, status, created_on FROM issues WHERE status='Open' AND issue_deadline < DATETIME('now')"
+                query = "SELECT issue_id, " \
+                        "issue_date, " \
+                        "issue_priority, " \
+                        "issue_observer," \
+                        "issue_inspection, " \
+                        "issue_theme, " \
+                        "issue_facility, " \
+                        "issue_insp_dept," \
+                        "issue_deadline, " \
+                        "status, " \
+                        "created_on " \
+                        "FROM issues " \
+                        "WHERE status='Open' AND issue_deadline < DATETIME('now')"
                 issues = db.cur.execute(query).fetchall()
 
                 for i in reversed(range(self.issuesTable.rowCount())):
@@ -365,9 +425,19 @@ class IssuesTab(QWidget):
                         else:
                             self.issuesTable.setItem(row_number, column_number, QTableWidgetItem(str(data)))
             elif self.closedIssuesRadioBtn.isChecked():
-                query = "SELECT issue_id, issue_date, issue_priority, issue_observer," \
-                                "issue_inspection, issue_theme, issue_facility, issue_insp_dept," \
-                                "issue_deadline, status, created_on FROM issues WHERE status='Closed'"
+                query = "SELECT " \
+                        "issue_id, " \
+                        "issue_date, " \
+                        "issue_priority, " \
+                        "issue_observer," \
+                        "issue_inspection, " \
+                        "issue_theme, " \
+                        "issue_facility, " \
+                        "issue_insp_dept," \
+                        "issue_deadline, " \
+                        "status, " \
+                        "created_on " \
+                        "FROM issues WHERE status='Closed'"
                 issues = db.cur.execute(query).fetchall()
 
                 for i in reversed(range(self.issuesTable.rowCount())):
@@ -462,7 +532,7 @@ class IssuesTab(QWidget):
                     QMessageBox.information(self, "Info", "No changes made")
             else:
                 row = self.issuesTable.currentRow()
-                issueId = self.issuesTable.item(row, 1).text()
+                issueId = self.issuesTable.item(row, 2).text()
                 issueId = issueId.lstrip("ISS#")
                 try:
                     query = "DELETE FROM issues WHERE issue_id = ?"
@@ -501,7 +571,6 @@ class IssuesTab(QWidget):
                             facility_record = db.cur.execute(query, (index,)).fetchone()
                             csv_writer.writerow(facility_record)
 
-
                     QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
             except:
                 QMessageBox.information(self, "Info", "Export failed")
@@ -526,19 +595,29 @@ class IssuesTab(QWidget):
 
                     workbook = xlsxwriter.Workbook(fileName)
                     worksheet = workbook.add_worksheet("Issues")
+                    worksheet.set_column('A:C', 12)
+                    worksheet.set_row(0, 30)
+                    merge_format = workbook.add_format({
+                        'bold': 1,
+                        'align': 'center',
+                        'valign': 'vcenter'})
+                    worksheet.merge_range('A1:B1', '',merge_format)
+                    worksheet.insert_image('A1', './assets/logo/logo-full-main.png',
+                                           {'x_scale': 0.4, 'y_scale': 0.4, 'x_offset': 15, 'y_offset': 10})
 
                     # Create header row
+                    stop = 17
                     col = 0
-                    for value in db.cur.description:
-                        worksheet.write(0, col, value[0])
+                    for i, value in enumerate(db.cur.description[:stop]):
+                        worksheet.write(1, col, value[0])
                         col += 1
 
                     # Write data to xlsx file
-                    row_number = 1
+                    row_number = 2
                     for index in range(len(indices)):
                         query = "SELECT * FROM issues WHERE issue_id=?"
                         issue_record = db.cur.execute(query, (indices[index],)).fetchone()
-                        for i, value in enumerate(issue_record):
+                        for i, value in enumerate(issue_record[:stop]):
                             worksheet.write(row_number, i, value)
                         row_number += 1
 
@@ -559,7 +638,7 @@ class IssuesTab(QWidget):
             try:
                 date = datetime.datetime.now()
 
-                # Get file location and add timestamp to when it was created to the filename
+                # Get file location and add timestamp it was created on to the filename
                 fileName, _ = QFileDialog.getSaveFileName(
                     self, "Save as...", "~/IssuesPDF" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".pdf",
                     "PDF files (*.pdf)")
@@ -574,15 +653,23 @@ class IssuesTab(QWidget):
                         issue_record = db.cur.execute(query, (indices[index],)).fetchone()
 
                         # This string allows for text formatting in the pdf, easy to implement and test
-                        stringIssue = "\nIssue id: " + str(issue_record[0]) + "\nissue_date: "  + str(issue_record[1]) +\
-                        "\nissue_priority: "  + str(issue_record[2]) +  "\nissue_observer: "  + str(issue_record[3]) +\
-                        "\nissue_team: "  + str(issue_record[4]) +  "\nissue_inspection: " + str(issue_record[5]) + \
-                        "\nissue_theme: " + str(issue_record[6]) + "\nissue_facility: " + str(issue_record[7]) +\
-                        "\nissue_fac_supervisor: " + str(issue_record[8]) + "\nissue_spec_loc: " + str(issue_record[9]) +\
-                        "\nissue_insp_dept: " + str(issue_record[10]) + "\nissue_insp_contr: " + str(issue_record[11]) +\
-                        "\nissue_insp_subcontr: " + str(issue_record[12]) + "\nissue_deadline: " + str(issue_record[13]) + \
-                        "\nstatus: " + str(issue_record[14]) + "\ncreated_on: " + str(issue_record[15]) +\
-                        "\nclosed_on: "  + str(issue_record[16])
+                        stringIssue = "\nIssue id: " + str(issue_record[0]) + \
+                                      "\nissue_date: " + str(issue_record[1]) + \
+                                      "\nissue_priority: " + str(issue_record[2]) + \
+                                      "\nissue_observer: " + str(issue_record[3]) + \
+                                      "\nissue_team: " + str(issue_record[4]) + \
+                                      "\nissue_inspection: " + str(issue_record[5]) + \
+                                      "\nissue_theme: " + str(issue_record[6]) + \
+                                      "\nissue_facility: " + str(issue_record[7]) + \
+                                      "\nissue_fac_supervisor: " + str(issue_record[8]) + \
+                                      "\nissue_spec_loc: " + str(issue_record[9]) + \
+                                      "\nissue_insp_dept: " + str(issue_record[10]) + \
+                                      "\nissue_insp_contr: " + str(issue_record[11]) + \
+                                      "\nissue_insp_subcontr: " + str(issue_record[12]) + \
+                                      "\nissue_deadline: " + str(issue_record[13]) + \
+                                      "\nstatus: " + str(issue_record[14]) + \
+                                      "\ncreated_on: " + str(issue_record[15]) + \
+                                      "\nclosed_on: " + str(issue_record[16])
 
                         pdf.multi_cell(200, 10, stringIssue)
                     pdf.output(fileName, 'F')

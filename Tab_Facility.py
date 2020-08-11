@@ -344,15 +344,24 @@ class FacilityTab(QWidget):
 
                     workbook = xlsxwriter.Workbook(fileName)
                     worksheet = workbook.add_worksheet("Facilities")
+                    worksheet.set_column('A:C', 12)
+                    worksheet.set_row(0, 30)
+                    merge_format = workbook.add_format({
+                        'bold': 1,
+                        'align': 'center',
+                        'valign': 'vcenter'})
+                    worksheet.merge_range('A1:B1', '',merge_format)
+                    worksheet.insert_image('A1', './assets/logo/logo-full-main.png',
+                                           {'x_scale': 0.4, 'y_scale': 0.4, 'x_offset': 15, 'y_offset': 10})
 
                     # Create header row
                     col = 0
                     for value in db.cur.description:
-                        worksheet.write(0, col, value[0])
+                        worksheet.write(1, col, value[0])
                         col += 1
 
                     # Write date to xlsx file
-                    row_number = 1
+                    row_number = 2
                     for index in range(len(indices)):
                         query = "SELECT * FROM facilities WHERE facility_id=?"
                         facility_record = db.cur.execute(query, (indices[index],)).fetchone()

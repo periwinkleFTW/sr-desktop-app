@@ -9,8 +9,9 @@ from PySide2.QtCore import QDateTime, Slot
 from PySide2.QtGui import QIcon, QPixmap, Qt
 from PySide2.QtWidgets import QWidget, QScrollArea, QLabel, QDateTimeEdit, QComboBox, QTextEdit, \
     QPushButton, QVBoxLayout, QHBoxLayout, QFormLayout, QFrame, QMessageBox, \
-    QFileDialog, QSpacerItem, QSizePolicy, QCalendarWidget
+    QFileDialog, QSpacerItem, QSizePolicy
 from backend import Database
+from dropdown_menu_data import IssuesDropdownData
 
 db = Database("sr-data.db")
 
@@ -22,7 +23,7 @@ class AddIssue(QWidget):
         QWidget.__init__(self)
         self.setWindowTitle("Add issue")
         self.setWindowIcon(QIcon("assets/icons/icon.ico"))
-        self.setGeometry(450, 150, 550, 950)
+        self.setGeometry(450, 150, 750, 950)
         # self.setFixedSize(self.size())
 
         self.Parent = parent
@@ -40,6 +41,8 @@ class AddIssue(QWidget):
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
 
+        self.dropdownData = IssuesDropdownData()
+
         # Top layout widgets
         self.addIssueImg = QLabel()
         self.img = QPixmap('assets/icons/create-issue.png')
@@ -52,26 +55,26 @@ class AddIssue(QWidget):
         self.dateEntry = QDateTimeEdit(calendarPopup=True)
         self.dateEntry.setDateTime(QDateTime.currentDateTime())
         self.priorityEntry = QComboBox()
-        self.priorityEntry.setEditable(True)
+        self.priorityEntry.addItems(self.dropdownData.priorityItems())
         self.observerEntry = QComboBox()
-        self.observerEntry.setEditable(True)
+        self.observerEntry.addItems(self.dropdownData.observerItems())
         self.revisionTeamEntry = QComboBox()
-        self.revisionTeamEntry.setEditable(True)
+        self.revisionTeamEntry.addItems(self.dropdownData.revTeamItems())
         self.inspectionNameEntry = QComboBox()
-        self.inspectionNameEntry.setEditable(True)
+        self.inspectionNameEntry.addItems(self.dropdownData.inspNameItems())
         self.observationThemeEntry = QComboBox()
-        self.observationThemeEntry.setEditable(True)
+        self.observationThemeEntry.addItems(self.dropdownData.hseThemeItems())
         self.facilityEntry = QComboBox()
-        self.facilityEntry.setEditable(True)
+        self.facilityEntry.addItems(self.dropdownData.facilityItems())
         self.facilitySupervisorEntry = QComboBox()
-        self.facilitySupervisorEntry.setEditable(True)
+        self.facilitySupervisorEntry.addItems(self.dropdownData.facSupervisorItems())
         self.specificLocationEntry = QTextEdit()
         self.inspectedDepartmentEntry = QComboBox()
-        self.inspectedDepartmentEntry.setEditable(True)
+        self.inspectedDepartmentEntry.addItems(self.dropdownData.inspDeptItems())
         self.inspectedContractorEntry = QComboBox()
-        self.inspectedContractorEntry.setEditable(True)
+        self.inspectedContractorEntry.addItems(self.dropdownData.inspContrItems())
         self.inspectedSubcontractorEntry = QComboBox()
-        self.inspectedSubcontractorEntry.setEditable(True)
+        self.inspectedSubcontractorEntry.addItems(self.dropdownData.inspSubcontrItems())
         self.deadlineEntry = QDateTimeEdit(calendarPopup=True)
         self.deadlineEntry.setDateTime(QDateTime.currentDateTime().addDays(14))
 
@@ -239,7 +242,8 @@ class AddIssue(QWidget):
         else:
             QMessageBox.information(self, "Info", "No file selected")
 
-################ Image processing functions ##########################################
+    # Image processing functions
+    @Slot()
     def crop_center(self, pil_img, crop_width, crop_height):
         img_width, img_height = pil_img.size
 
@@ -256,5 +260,6 @@ class AddIssue(QWidget):
                              (img_height + crop_height) // 2))
 
     # Crop the largest possible square from a rectangle
+    @Slot()
     def crop_max_square(self, pil_img):
         return self.crop_center(pil_img, min(pil_img.size), min(pil_img.size))

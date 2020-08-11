@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QComboBox, QFrame, QFormLayout, QMessageBox, QSpacerItem, QSizePolicy, QFileDialog
-from PySide2.QtGui import QIcon, QPixmap
+from PySide2.QtGui import QIcon, QPixmap, QPainter, QPalette, QPainterPath, QPen, QColor
 from PySide2.QtCore import Qt, Slot
 
 import backend
@@ -225,3 +225,45 @@ class AddPerson(QWidget):
         result.putalpha(mask)
 
         return result
+
+
+# class NewLineEdit(QLineEdit):
+#
+#     def __init__(self, label, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.label = label
+#         self.lrect = self.fontMetrics().boundingRect(label)
+#         self.setStyleSheet(f'''
+#         QLineEdit {{
+#             background-color: rgba(0, 0, 0, 0%);
+#             border: none;
+#             padding: 9px;
+#             margin-top: {self.lrect.height() / 2}px;
+#             color: blue;
+#         }}''')
+#         self.setAttribute(Qt.WA_MacShowFocusRect, False)
+#         self.setMinimumWidth(200)
+#
+#     def paintEvent(self, event):
+#         super().paintEvent(event)
+#         w, h = self.width(), self.height()
+#         lh = self.lrect.height() / 2
+#
+#         path = QPainterPath()
+#         path.moveTo(30, lh + 3)
+#         path.lineTo(9, lh + 3)
+#         path.quadTo(3, lh + 3, 3, lh + 9)
+#         path.lineTo(3, h - 9)
+#         path.quadTo(3, h - 3, 9, h - 3)
+#         path.lineTo(w - 9, h - 3)
+#         path.quadTo(w - 3, h - 3, w - 3, h - 9)
+#         path.lineTo(w - 3, lh + 9)
+#         path.quadTo(w - 3, lh + 3, w - 9, lh + 3)
+#         path.lineTo(42 + self.lrect.width(), lh + 3)
+#
+#         qp = QPainter(self)
+#         qp.setRenderHint(QPainter.Antialiasing)
+#         qp.setPen(QPen(QColor('#000000'), 1))
+#         qp.drawPath(path)
+#         qp.setPen(Qt.black)
+#         qp.drawText(36, self.lrect.height(), self.label)

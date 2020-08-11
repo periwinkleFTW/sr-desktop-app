@@ -1,9 +1,11 @@
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QComboBox, QFrame, \
-    QFormLayout, QMessageBox, QDateTimeEdit, QHBoxLayout, QSpacerItem, QSizePolicy
+    QFormLayout, QMessageBox, QDateTimeEdit, QHBoxLayout, QSpacerItem, QSizePolicy, QTextEdit
 from PySide2.QtGui import QPixmap, QIcon
 from PySide2.QtCore import Qt, QDateTime, Slot
 
 import backend
+
+from dropdown_menu_data import IssuesDropdownData
 
 import styles
 
@@ -15,7 +17,7 @@ class DisplayIssue(QWidget):
         QWidget.__init__(self)
         self.setWindowTitle("View issue")
         self.setWindowIcon(QIcon("assets/icons/logo-dark.png"))
-        self.setGeometry(450, 150, 450, 650)
+        self.setGeometry(450, 150, 750, 950)
 
         self.Parent = parent
 
@@ -56,7 +58,11 @@ class DisplayIssue(QWidget):
         self.deadline = issue[13]
         self.status = issue[14]
 
+        print(self.status)
+
     def widgets(self):
+        self.dropdownData = IssuesDropdownData()
+
         # Top layout widgets
         self.issueImg = QLabel()
         self.img = QPixmap('assets/icons/logo-dark.png')
@@ -70,29 +76,40 @@ class DisplayIssue(QWidget):
         self.dateEntry = QDateTimeEdit(calendarPopup=True)
         self.dateEntry.setDateTime(QDateTime.fromString(self.date, "yyyy-MM-dd h:mm AP"))
 
-        self.priorityEntry = QLineEdit()
-        self.priorityEntry.setText(self.priority)
-        self.observerEntry = QLineEdit()
-        self.observerEntry.setText(self.observer)
-        self.revTeamEntry = QLineEdit()
-        self.revTeamEntry.setText(self.revTeam)
-        self.inspectionNameEntry = QLineEdit()
-        self.inspectionNameEntry.setText(self.inspectorName)
-        self.themeEntry = QLineEdit()
-        self.themeEntry.setText(self.theme)
-        self.facilityEntry = QLineEdit()
-        self.facilityEntry.setText(self.facility)
-        self.facilitySupervisorEntry = QLineEdit()
-        self.facilitySupervisorEntry.setText(self.facilitySupervisor)
-        self.specLocationEntry = QLineEdit()
+        self.priorityEntry = QComboBox()
+        self.priorityEntry.addItems(self.dropdownData.priorityItems())
+        self.priorityEntry.setCurrentText(self.priority)
+        self.observerEntry = QComboBox()
+        self.observerEntry.addItems(self.dropdownData.observerItems())
+        self.observerEntry.setCurrentText(self.observer)
+        self.revTeamEntry = QComboBox()
+        self.revTeamEntry.addItems(self.dropdownData.revTeamItems())
+        self.revTeamEntry.setCurrentText(self.revTeam)
+        self.inspectionNameEntry = QComboBox()
+        self.inspectionNameEntry.addItems(self.dropdownData.inspNameItems())
+        self.inspectionNameEntry.setCurrentText(self.inspectorName)
+        self.themeEntry = QComboBox()
+        self.themeEntry.addItems(self.dropdownData.hseThemeItems())
+        self.themeEntry.setCurrentText(self.theme)
+        self.facilityEntry = QComboBox()
+        self.facilityEntry.addItems(self.dropdownData.facilityItems())
+        self.facilityEntry.setCurrentText(self.facility)
+        self.facilitySupervisorEntry = QComboBox()
+        self.facilitySupervisorEntry.addItems(self.dropdownData.facSupervisorItems())
+        self.facilitySupervisorEntry.setCurrentText(self.facilitySupervisor)
+        self.specLocationEntry = QTextEdit()
         self.specLocationEntry.setText(self.specLocation)
-        self.inspectedDeptEntry = QLineEdit()
-        self.inspectedDeptEntry.setText(self.inspectedDept)
-        self.inspectedContrEntry = QLineEdit()
-        self.inspectedContrEntry.setText(self.inspectedContr)
-        self.inspectedSubcontrEntry = QLineEdit()
-        self.inspectedSubcontrEntry.setText(self.inspectedSubcontr)
+        self.inspectedDeptEntry = QComboBox()
+        self.inspectedDeptEntry.addItems(self.dropdownData.inspDeptItems())
+        self.inspectedDeptEntry.setCurrentText(self.inspectedDept)
+        self.inspectedContrEntry = QComboBox()
+        self.inspectedContrEntry.addItems(self.dropdownData.inspContrItems())
+        self.inspectedContrEntry.setCurrentText(self.inspectedContr)
+        self.inspectedSubcontrEntry = QComboBox()
+        self.inspectedSubcontrEntry.addItems(self.dropdownData.inspSubcontrItems())
+        self.inspectedSubcontrEntry.setCurrentText(self.inspectedSubcontr)
         self.statusEntry = QComboBox()
+        self.statusEntry.addItems(self.dropdownData.statusItems())
         self.statusEntry.setCurrentText(self.status)
         self.deadlineEntry = QDateTimeEdit(calendarPopup=True)
         self.deadlineEntry.setDateTime(QDateTime.fromString(self.deadline, "yyyy-MM-dd h:mm AP"))
@@ -162,27 +179,39 @@ class DisplayIssue(QWidget):
         issueId = issueId.lstrip("ISS#")
 
         date = self.dateEntry.text()
-        priority = self.priorityEntry.text()
-        observer = self.observerEntry.text()
-        revTeam = self.revTeamEntry.text()
-        inspectionName = self.inspectionNameEntry.text()
-        theme = self.themeEntry.text()
-        facility = self.facilityEntry.text()
-        facilitySupervisor = self.facilitySupervisorEntry.text()
-        specLocation = self.specLocationEntry.text()
-        inspDept = self.inspectedDeptEntry.text()
-        inspContr = self.inspectedContrEntry.text()
-        inspSubcontr = self.inspectedSubcontrEntry.text()
+        priority = self.priorityEntry.currentText()
+        observer = self.observerEntry.currentText()
+        revTeam = self.revTeamEntry.currentText()
+        inspectionName = self.inspectionNameEntry.currentText()
+        theme = self.themeEntry.currentText()
+        facility = self.facilityEntry.currentText()
+        facilitySupervisor = self.facilitySupervisorEntry.currentText()
+        specLocation = self.specLocationEntry.toPlainText()
+        inspDept = self.inspectedDeptEntry.currentText()
+        inspContr = self.inspectedContrEntry.currentText()
+        inspSubcontr = self.inspectedSubcontrEntry.currentText()
         status_ = self.statusEntry.currentText()
         deadline = self.deadlineEntry.text()
 
         if (date and priority and observer and revTeam and inspectionName and theme and facility
                 and facilitySupervisor and specLocation and inspDept and deadline != ""):
             try:
-                query = "UPDATE issues SET issue_date=?, issue_priority=?, issue_observer=?, issue_team=?," \
-                        "issue_inspection=?, issue_theme=?, issue_facility=?, issue_fac_supervisor=?," \
-                        "issue_spec_loc=?, issue_insp_dept=?, issue_insp_contr=?, issue_insp_subcontr=?," \
-                        "issue_deadline=?, status=? WHERE issue_id=? "
+                query = "UPDATE issues SET " \
+                        "issue_date=?, " \
+                        "issue_priority=?, " \
+                        "issue_observer=?, " \
+                        "issue_team=?," \
+                        "issue_inspection=?, " \
+                        "issue_theme=?, " \
+                        "issue_facility=?, " \
+                        "issue_fac_supervisor=?," \
+                        "issue_spec_loc=?, " \
+                        "issue_insp_dept=?, " \
+                        "issue_insp_contr=?, " \
+                        "issue_insp_subcontr=?," \
+                        "issue_deadline=?, " \
+                        "status=? " \
+                        "WHERE issue_id=? "
 
                 db.cur.execute(query, (date, priority, observer, revTeam, inspectionName, theme, facility,
                                        facilitySupervisor, specLocation, inspDept, inspContr, inspSubcontr,

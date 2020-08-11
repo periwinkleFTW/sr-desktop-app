@@ -3,6 +3,7 @@
 # This file contains stylesheets for GUI elements
 ############################################################
 
+#  background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f6f7fa, stop: 1 #edf3f6);
 
 def mainStyle():
     return '''  
@@ -54,15 +55,15 @@ def mainStyle():
     }
     
     QGroupBox {
-    background-color:#edf3f6;
+    background-color:#E6EFF3;
     font: 15px Bold;
     color: white;
     border: 1px solid gray;
-    border-color: #8B97A3;
+    border-color: #EBEBEB;
     border-radius: 5px;
     margin-top: 1ex;
-    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f6f7fa, stop: 1 #edf3f6);
     }
+    
     
     QTableWidget {
     border: 1px solid gray;
@@ -94,6 +95,10 @@ def groupBoxFillerStyle():
 
 def addPopups():
     return '''
+    QWidget {
+    background-color: #F4F7F9;
+    }
+    
     QWidget#add_issue_popup {
     background-color: #F4F7F9;
     }
@@ -124,7 +129,8 @@ def addPopups():
     border: 1px solid gray; 
     padding-top: 30px; 
     padding-bottom: 30px; 
-    border-radius: 5; font: 16px;
+    border-radius: 5; 
+    font: 16px;
     }
     
     QScrollArea > QWidget > QWidget {
@@ -134,6 +140,13 @@ def addPopups():
     
     QWidget > QScrollArea {
     background-color: transparent;
+    }
+    
+    QWidget > QLineEdit {
+    background-color: #ffffff;
+    border: 1px solid gray;
+    border-radius: 5;
+    font: 15px;
     }
     '''
 
