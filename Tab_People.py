@@ -93,11 +93,17 @@ class PeopleTab(QWidget):
         self.viewPerson.clicked.connect(self.selectedPerson)
         self.deletePerson = QPushButton("Delete")
         self.deletePerson.clicked.connect(self.funcDeletePerson)
+
         self.exportPeopleCSVBtn = QPushButton("Export CSV")
+        self.exportPeopleCSVBtn.setEnabled(False)
         self.exportPeopleCSVBtn.clicked.connect(self.funcPeopleToCSV)
+
         self.exportPeopleXLSXBtn = QPushButton("Export XLSX")
+        self.exportPeopleXLSXBtn.setEnabled(False)
         self.exportPeopleXLSXBtn.clicked.connect(self.funcPeopleToXLSX)
+
         self.exportPeoplePDFBtn = QPushButton("Export PDF")
+        self.exportPeoplePDFBtn.setEnabled(False)
         self.exportPeoplePDFBtn.clicked.connect(self.funcPeopleToPdf)
 
 
@@ -192,6 +198,7 @@ class PeopleTab(QWidget):
             widget = QWidget()
             checkBox = QCheckBox()
             checkBox.setCheckState(Qt.Unchecked)
+            checkBox.stateChanged.connect(self.funcActivateBtnsWithCheckbox)
             hBoxLayout = QHBoxLayout(widget)
             hBoxLayout.addWidget(checkBox)
             hBoxLayout.setAlignment(Qt.AlignCenter)
@@ -215,6 +222,19 @@ class PeopleTab(QWidget):
 
         self.peopleTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.peopleTable.setSelectionBehavior(QTableView.SelectRows)
+
+    @Slot()
+    def funcActivateBtnsWithCheckbox(self):
+        indices = self.funcPeopleCheckBox()
+
+        if self.sender().isChecked() or indices:
+            self.exportPeopleCSVBtn.setEnabled(True)
+            self.exportPeopleXLSXBtn.setEnabled(True)
+            self.exportPeoplePDFBtn.setEnabled(True)
+        else:
+            self.exportPeopleCSVBtn.setEnabled(False)
+            self.exportPeopleXLSXBtn.setEnabled(False)
+            self.exportPeoplePDFBtn.setEnabled(False)
 
     @Slot()
     def funcAddPerson(self):

@@ -101,13 +101,19 @@ class IssuesTab(QWidget):
         self.deleteIssue = QPushButton("Delete")
         self.deleteIssue.setObjectName("btn_deleteIssue")
         self.deleteIssue.clicked.connect(self.funcDeleteIssue)
+
         self.exportIssuesCSVBtn = QPushButton("Export CSV")
+        self.exportIssuesCSVBtn.setEnabled(False)
         self.exportIssuesCSVBtn.setObjectName("btn_exportIssuesCSV")
         self.exportIssuesCSVBtn.clicked.connect(self.funcIssuesToCSV)
+
         self.exportIssuesXLSXBtn = QPushButton("Export XLSX")
+        self.exportIssuesXLSXBtn.setEnabled(False)
         self.exportIssuesXLSXBtn.setObjectName("btn_exportIssuesXLSX")
         self.exportIssuesXLSXBtn.clicked.connect(self.funcIssuestoXLSX)
+
         self.exportIssuesPDFBtn = QPushButton("Export PDF")
+        self.exportIssuesPDFBtn.setEnabled(False)
         self.exportIssuesPDFBtn.setObjectName("btn_exportIssuesPDF")
         self.exportIssuesPDFBtn.clicked.connect(self.funcIssuesToPdf)
 
@@ -212,6 +218,7 @@ class IssuesTab(QWidget):
             qwidget = QWidget()
             checkbox = QCheckBox()
             checkbox.setCheckState(Qt.Unchecked)
+            checkbox.stateChanged.connect(self.funcActivateBtnsWithCheckbox)
             qhboxlayout = QHBoxLayout(qwidget)
             qhboxlayout.addWidget(checkbox)
             qhboxlayout.setAlignment(Qt.AlignCenter)
@@ -262,6 +269,19 @@ class IssuesTab(QWidget):
 
         self.issuesTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.issuesTable.setSelectionBehavior(QTableView.SelectRows)
+
+    @Slot()
+    def funcActivateBtnsWithCheckbox(self):
+        indices = self.funcIssuesCheckBox()
+
+        if self.sender().isChecked() or indices:
+            self.exportIssuesCSVBtn.setEnabled(True)
+            self.exportIssuesXLSXBtn.setEnabled(True)
+            self.exportIssuesPDFBtn.setEnabled(True)
+        else:
+            self.exportIssuesCSVBtn.setEnabled(False)
+            self.exportIssuesXLSXBtn.setEnabled(False)
+            self.exportIssuesPDFBtn.setEnabled(False)
 
     @Slot()
     def funcAddIssue(self):
@@ -565,11 +585,11 @@ class IssuesTab(QWidget):
                         # Setting cursor on the correct table
                         db.cur.execute("SELECT * FROM issues")
                         # Get headers
-                        csv_writer.writerow([i[0] for i in db.cur.description])
+                        csv_writer.writerow([i[0] for i in db.cur.description[:17]])
                         for index in indices:
                             query = "SELECT * FROM issues WHERE issue_id=?"
                             facility_record = db.cur.execute(query, (index,)).fetchone()
-                            csv_writer.writerow(facility_record)
+                            csv_writer.writerow(facility_record[:17])
 
                     QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
             except:
@@ -601,7 +621,7 @@ class IssuesTab(QWidget):
                         'bold': 1,
                         'align': 'center',
                         'valign': 'vcenter'})
-                    worksheet.merge_range('A1:B1', '',merge_format)
+                    worksheet.merge_range('A1:B1', '', merge_format)
                     worksheet.insert_image('A1', './assets/logo/logo-full-main.png',
                                            {'x_scale': 0.4, 'y_scale': 0.4, 'x_offset': 15, 'y_offset': 10})
 
@@ -618,6 +638,13 @@ class IssuesTab(QWidget):
                         query = "SELECT * FROM issues WHERE issue_id=?"
                         issue_record = db.cur.execute(query, (indices[index],)).fetchone()
                         for i, value in enumerate(issue_record[:stop]):
+                            if issue_record[18]:
+                                worksheet.set_row(row_number, 185)
+                                worksheet.set_column(17, 17, 35)
+                                worksheet.insert_image(
+                                    row_number, 17, issue_record[18],
+                                    {'x_scale': 0.3, 'y_scale': 0.3})
+
                             worksheet.write(row_number, i, value)
                         row_number += 1
 
@@ -671,7 +698,14 @@ class IssuesTab(QWidget):
                                       "\ncreated_on: " + str(issue_record[15]) + \
                                       "\nclosed_on: " + str(issue_record[16])
 
+                        pdf.line(pdf.l_margin, pdf.y, pdf.w - pdf.r_margin, pdf.y)
                         pdf.multi_cell(200, 10, stringIssue)
+                        if issue_record[18]:
+                            pdf.image(issue_record[18], w=70)
+
+                        if index != (len(indices) - 1):
+                            pdf.add_page()
+
                     pdf.output(fileName, 'F')
 
                     QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))

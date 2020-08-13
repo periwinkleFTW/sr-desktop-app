@@ -89,11 +89,17 @@ class FacilityTab(QWidget):
         self.viewFacility.clicked.connect(self.funcSelectedFacility)
         self.deleteFacility = QPushButton("Delete")
         self.deleteFacility.clicked.connect(self.funcDeleteFacility)
+
         self.exportFacilitiesCSVBtn = QPushButton("Export CSV")
+        self.exportFacilitiesCSVBtn.setEnabled(False)
         self.exportFacilitiesCSVBtn.clicked.connect(self.funcFacilitiesToCSV)
+
         self.exportFacilitiesXSLXBtn = QPushButton("Export XLSX")
+        self.exportFacilitiesXSLXBtn.setEnabled(False)
         self.exportFacilitiesXSLXBtn.clicked.connect(self.funcFacilitiesToXLSX)
+
         self.exportFacilitiesPDFBtn = QPushButton("Export PDF")
+        self.exportFacilitiesPDFBtn.setEnabled(False)
         self.exportFacilitiesPDFBtn.clicked.connect(self.funcFacilitiesToPdf)
 
 
@@ -184,6 +190,7 @@ class FacilityTab(QWidget):
             qwidget = QWidget()
             checkbox = QCheckBox()
             checkbox.setCheckState(Qt.Unchecked)
+            checkbox.stateChanged.connect(self.funcActivateBtnsWithCheckbox)
             qhboxlayout = QHBoxLayout(qwidget)
             qhboxlayout.addWidget(checkbox)
             qhboxlayout.setAlignment(Qt.AlignCenter)
@@ -198,6 +205,19 @@ class FacilityTab(QWidget):
 
         self.facilitiesTable.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.facilitiesTable.setSelectionBehavior(QTableView.SelectRows)
+
+    @Slot()
+    def funcActivateBtnsWithCheckbox(self):
+        indices = self.funcFacilitiesCheckBox()
+
+        if self.sender().isChecked() or indices:
+            self.exportFacilitiesCSVBtn.setEnabled(True)
+            self.exportFacilitiesXSLXBtn.setEnabled(True)
+            self.exportFacilitiesPDFBtn.setEnabled(True)
+        else:
+            self.exportFacilitiesCSVBtn.setEnabled(False)
+            self.exportFacilitiesXSLXBtn.setEnabled(False)
+            self.exportFacilitiesPDFBtn.setEnabled(False)
 
     @Slot()
     def funcFacilitiesCheckBox(self):
