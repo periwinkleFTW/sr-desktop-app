@@ -58,8 +58,6 @@ class DisplayIssue(QWidget):
         self.deadline = issue[13]
         self.status = issue[14]
 
-        print(self.status)
-
     def widgets(self):
         self.dropdownData = IssuesDropdownData()
 

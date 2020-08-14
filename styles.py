@@ -63,13 +63,14 @@ def mainStyle():
     border-radius: 5px;
     margin-top: 1ex;
     }
-    
-    
+        
     QTableWidget {
     border: 1px solid gray;
     padding: -2px;
     background-color: white;
     alternate-background-color: #FAFBFC;
+    selection-background-color: #DFF9E3;
+    selection-color: black;
     }
     
     QTableWidget::item {
@@ -81,6 +82,30 @@ def mainStyle():
     border: 1px solid gray;
     font: 13px;
     background-color: #EDF1F5;
+    }
+    
+    QPushButton {
+    min-width: 60px;
+    height: 20px;
+    border: 1px solid gray;
+    border-radius: 5px;
+    border-style: outset;
+    background-color: #FDFEFA;
+    }
+    
+    QPushButton:hover {
+    border-style: double;
+    background-color: #F7FFFD;
+    }
+    
+    QPushButton:pressed {
+    background-color: #80B9FF;
+    }
+    
+
+    
+    QPushButton:disabled {
+    border: none;
     }
     
     '''
@@ -99,15 +124,12 @@ def addPopups():
     background-color: #F4F7F9;
     }
     
-    QWidget#add_issue_popup {
-    background-color: #F4F7F9;
-    }
-    
     QWidget > QLabel#add_issue_title_txt {
     border: 1px solid gray; 
     padding-top: 30px; 
     padding-bottom: 30px; 
-    border-radius: 5; font: 16px;
+    border-radius: 5; 
+    font: 16px;
     }
     
     QWidget#add_person_popup {
@@ -133,20 +155,36 @@ def addPopups():
     font: 16px;
     }
     
-    QScrollArea > QWidget > QWidget {
-    border: none;
-    background-color: #F4F7F9;
-    }
-    
     QWidget > QScrollArea {
     background-color: transparent;
     }
     
-    QWidget > QLineEdit {
-    background-color: #ffffff;
+    QScrollArea > QWidget > QWidget {
+    border: none;
+    background-color: #F4F7F9;
+    }  
+    
+    QPushButton {
+    min-width: 60px;
+    width: 60px;
+    height: 20px;
     border: 1px solid gray;
-    border-radius: 5;
-    font: 15px;
+    border-radius: 5px;
+    border-style: outset;
+    background-color: #FDFEFA;
     }
+    
+    QPushButton:pressed {
+    background-color: #CCE3FF;
+    }
+    
+    QPushButton:hover {
+    border-style: double;
+    }
+    
+    QPushButton:disabled {
+    border: none;
+    }
+    
     '''
 

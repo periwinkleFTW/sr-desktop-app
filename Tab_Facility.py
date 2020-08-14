@@ -422,11 +422,12 @@ class FacilityTab(QWidget):
                         facility_record = db.cur.execute(query, (indices[index],)).fetchone()
 
                         # This string allows for text formatting in the pdf, easy to implement and test
-                        stringFacility = "\nFacility id: " + str(facility_record[0]) + "\nFacility name: " + str(facility_record[1]) + \
-                                      "\nLocation: " + str(facility_record[2]) + "\nPhone: " + str(
-                            facility_record[3]) + \
-                                      "\nEmail: " + str(facility_record[4]) + "\nSupervisor: " + str(
-                            facility_record[5])
+                        stringFacility = "\nFacility id: " + str(facility_record[0]) + \
+                                         "\nFacility name: " + str(facility_record[1]) + \
+                                         "\nLocation: " + str(facility_record[2]) + \
+                                         "\nPhone: " + str(facility_record[3]) + \
+                                         "\nEmail: " + str(facility_record[4]) + \
+                                         "\nSupervisor: " + str(facility_record[5])
 
                         pdf.multi_cell(200, 10, stringFacility)
                     pdf.output(fileName, 'F')

@@ -47,11 +47,17 @@ class AddPerson(QWidget):
         self.titleText.setAlignment(Qt.AlignCenter)
         # Bottom layout widgets
         self.firstNameEntry = QLineEdit()
+        self.firstNameEntry.setClearButtonEnabled(True)
         self.lastNameEntry = QLineEdit()
+        self.lastNameEntry.setClearButtonEnabled(True)
         self.titleEntry = QLineEdit()
+        self.titleEntry.setClearButtonEnabled(True)
         self.phoneEntry = QLineEdit()
+        self.phoneEntry.setClearButtonEnabled(True)
         self.emailEntry = QLineEdit()
+        self.emailEntry.setClearButtonEnabled(True)
         self.locationEntry = QLineEdit()
+        self.locationEntry.setClearButtonEnabled(True)
 
         emplTypes = ["Employee", "Contractor", "Subcontractor"]
         self.employmentTypeEntry = QComboBox()

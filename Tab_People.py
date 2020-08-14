@@ -544,6 +544,12 @@ class PeopleTab(QWidget):
                         query = "SELECT * FROM people WHERE person_id=?"
                         person_record = db.cur.execute(query, (indices[index],)).fetchone()
                         for i, value in enumerate(person_record[:stop]):
+                            if person_record[9]:
+                                worksheet.set_row(row_number, 185)
+                                worksheet.set_column(8, 8, 35)
+                                worksheet.insert_image(
+                                    row_number, 8, person_record[9],
+                                    {'x_scale': 0.3, 'y_scale': 0.3})
                             worksheet.write(row_number, i, value)
                         row_number += 1
 
@@ -580,15 +586,28 @@ class PeopleTab(QWidget):
                         person_record = db.cur.execute(query, (indices[index],)).fetchone()
 
                         # This string allows for text formatting in the pdf, easy to implement and test
-                        stringPerson = "\nPerson id: " + str(person_record[0]) + "\nFirst name: " + str(person_record[1]) + \
-                                      "\nLast name: " + str(person_record[2]) + "\nTitle: " + str(
-                            person_record[3]) + \
-                                      "\nPhone: " + str(person_record[4]) + "\nEmail: " + str(
-                            person_record[5]) + \
-                                      "\nLocation: " + str(person_record[6]) + "\nEmployment type: " + str(
-                            person_record[7])
+                        stringPerson = "\nPerson id: " + str(person_record[0]) + \
+                                       "\nFirst name: " + str(person_record[1]) + \
+                                       "\nLast name: " + str(person_record[2]) + \
+                                       "\nTitle: " + str(person_record[3]) + \
+                                       "\nPhone: " + str(person_record[4]) + \
+                                       "\nEmail: " + str(person_record[5]) + \
+                                       "\nLocation: " + str(person_record[6]) + \
+                                       "\nEmployment type: " + str(person_record[7])
 
-                        pdf.multi_cell(200, 10, stringPerson)
+                        effectivePageWidth = pdf.w - 2 * pdf.l_margin
+                        ybefore = pdf.get_y()
+                        pdf.multi_cell(effectivePageWidth / 2, 10, stringPerson)
+
+                        if person_record[9]:
+                            pdf.set_xy(effectivePageWidth / 2 + pdf.l_margin, ybefore)
+                            pdf.image(person_record[9], effectivePageWidth / 2 + 20, 40, w=70)
+                        pdf.ln(0.5)
+
+                        if index != (len(indices) - 1):
+                            pdf.add_page()
+
+                        # pdf.multi_cell(200, 10, stringPerson)
                     pdf.output(fileName, 'F')
 
                     QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))

@@ -644,7 +644,6 @@ class IssuesTab(QWidget):
                                 worksheet.insert_image(
                                     row_number, 17, issue_record[18],
                                     {'x_scale': 0.3, 'y_scale': 0.3})
-
                             worksheet.write(row_number, i, value)
                         row_number += 1
 
@@ -681,28 +680,35 @@ class IssuesTab(QWidget):
 
                         # This string allows for text formatting in the pdf, easy to implement and test
                         stringIssue = "\nIssue id: " + str(issue_record[0]) + \
-                                      "\nissue_date: " + str(issue_record[1]) + \
-                                      "\nissue_priority: " + str(issue_record[2]) + \
-                                      "\nissue_observer: " + str(issue_record[3]) + \
-                                      "\nissue_team: " + str(issue_record[4]) + \
-                                      "\nissue_inspection: " + str(issue_record[5]) + \
-                                      "\nissue_theme: " + str(issue_record[6]) + \
-                                      "\nissue_facility: " + str(issue_record[7]) + \
-                                      "\nissue_fac_supervisor: " + str(issue_record[8]) + \
-                                      "\nissue_spec_loc: " + str(issue_record[9]) + \
-                                      "\nissue_insp_dept: " + str(issue_record[10]) + \
-                                      "\nissue_insp_contr: " + str(issue_record[11]) + \
-                                      "\nissue_insp_subcontr: " + str(issue_record[12]) + \
-                                      "\nissue_deadline: " + str(issue_record[13]) + \
-                                      "\nstatus: " + str(issue_record[14]) + \
-                                      "\ncreated_on: " + str(issue_record[15]) + \
-                                      "\nclosed_on: " + str(issue_record[16])
+                                      "\nIssue date: " + str(issue_record[1]) + \
+                                      "\nPriority: " + str(issue_record[2]) + \
+                                      "\nObserver: " + str(issue_record[3]) + \
+                                      "\nRevision team: " + str(issue_record[4]) + \
+                                      "\nInspection name: " + str(issue_record[5]) + \
+                                      "\nHSE theme: " + str(issue_record[6]) + \
+                                      "\nFacility: " + str(issue_record[7]) + \
+                                      "\nFacility supervisor: " + str(issue_record[8]) + \
+                                      "\nSpecific location: " + str(issue_record[9]) + \
+                                      "\nInspected department: " + str(issue_record[10]) + \
+                                      "\nInspected contractor: " + str(issue_record[11]) + \
+                                      "\nInspected subcontractor: " + str(issue_record[12]) + \
+                                      "\nDeadline: " + str(issue_record[13]) + \
+                                      "\nStatus: " + str(issue_record[14]) + \
+                                      "\nCreated on: " + str(issue_record[15]) + \
+                                      "\nClosed on: " + str(issue_record[16])
 
-                        pdf.line(pdf.l_margin, pdf.y, pdf.w - pdf.r_margin, pdf.y)
-                        pdf.multi_cell(200, 10, stringIssue)
+                        effectivePageWidth = pdf.w - 2 * pdf.l_margin
+
+                        ybefore = pdf.get_y()
+                        pdf.multi_cell(effectivePageWidth / 2, 10, stringIssue)
+
                         if issue_record[18]:
-                            pdf.image(issue_record[18], w=70)
+                            pdf.set_xy(effectivePageWidth / 2 + pdf.l_margin, ybefore)
+                            pdf.image(issue_record[18], effectivePageWidth / 2 + 20, 40, w=70)
+                        pdf.ln(0.5)
 
+                        # Page break is achieved by adding a new page
+                        # after all items except for the last one
                         if index != (len(indices) - 1):
                             pdf.add_page()
 
