@@ -5,7 +5,7 @@
 
 
 from PySide2.QtWidgets import QWidget, QTabWidget, QVBoxLayout, QLabel
-from PySide2.QtGui import QLinearGradient, QPixmap
+from PySide2.QtGui import QPixmap
 
 
 from Tab_Issues import IssuesTab

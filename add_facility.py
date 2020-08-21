@@ -3,6 +3,7 @@ import string
 from datetime import datetime
 from os import path as osPath
 from shutil import copy2 as ShCopy2
+from PIL import Image
 
 from PySide2.QtWidgets import QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, \
     QFrame, QFormLayout, QMessageBox, QSpacerItem, QSizePolicy, QFileDialog
@@ -116,6 +117,14 @@ class AddFacility(QWidget):
         if self.filePathName != "":
             self.newFilePath = ShCopy2(self.filePathName, self.attachedFilePath)
 
+            im = Image.open(self.filePathName)
+
+            im_resized = self.crop_max_square(im).resize((800, 800), Image.LANCZOS)
+            im_resized.save(self.attachedResizedFilePath)
+        else:
+            self.attachedFilePath = ""
+            self.attachedResizedFilePath = ""
+
         name = self.facilityNameEntry.text()
         location = self.facilityLocationEntry.text()
         phone = self.facilityPhoneEntry.text()
@@ -150,8 +159,14 @@ class AddFacility(QWidget):
             if fileExt == '.jpg' or fileExt == '.jpeg' or fileExt == '.png':
                 date = datetime.now()
                 randomSuffix = "".join(random.choice(string.ascii_lowercase) for i in range(15))
-                self.attachedFilePath = "./assets/media/facilities-media/" + \
-                                        "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + fileExt
+
+                self.attachedFilePath = osPath.join("assets", "media", "facilities-media", "photos",
+                                                     ("{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + fileExt))
+                self.attachedResizedFilePath = osPath.join("assets", "media", "facilities-media", "photos_resized",
+                                                            ("{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + "_resized" + fileExt))
+
+                # self.attachedFilePath = "./assets/media/facilities-media/" + \
+                #                         "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + fileExt
 
                 QMessageBox.information(self, "Info", "File attached successfully")
 
@@ -161,9 +176,27 @@ class AddFacility(QWidget):
             QMessageBox.information(self, "Info", "Something went wrong. Try again...")
 
 
+    # Image processing functions
+    @Slot()
+    def crop_center(self, pil_img, crop_width, crop_height):
+        img_width, img_height = pil_img.size
 
+        fill_color = 'rgba(255, 255, 255, 1)'
 
+        if pil_img.mode in ('RGBA', 'LA'):
+            background = Image.new(pil_img.mode[:-1], pil_img.size, fill_color)
+            background.paste(pil_img, pil_img.split()[-1])
+            image = background
 
+        return pil_img.crop(((img_width - crop_width) // 2,
+                             (img_height - crop_height) // 2,
+                             (img_width + crop_width) // 2,
+                             (img_height + crop_height) // 2))
+
+    # Crop the largest possible square from a rectangle
+    @Slot()
+    def crop_max_square(self, pil_img):
+        return self.crop_center(pil_img, min(pil_img.size), min(pil_img.size))
 
 
 

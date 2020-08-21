@@ -230,10 +230,12 @@ class AddIssue(QWidget):
             if fileExt == '.jpg' or fileExt == '.jpeg' or fileExt == '.png':
                 date = datetime.now()
                 randomSuffix = "".join(random.choice(string.ascii_lowercase) for i in range(15))
-                self.attachedFilePath = "./assets/media/issues-media/photos/" + \
-                                        "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + fileExt
-                self.attachedResizedFilePath = "./assets/media/issues-media/photos_resized/" + \
-                                        "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + "_resized" + fileExt
+
+                self.attachedFilePath = osPath.join("assets", "media", "issues-media", "photos",
+                                                     ("{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + fileExt))
+                self.attachedResizedFilePath = osPath.join("assets", "media", "issues-media", "photos_resized",
+                                                            ("{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + "_resized" + fileExt))
+
 
                 QMessageBox.information(self, "Info", "File attached successfully")
 

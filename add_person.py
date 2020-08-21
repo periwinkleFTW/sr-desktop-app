@@ -179,12 +179,14 @@ class AddPerson(QWidget):
             if fileExt == '.jpg' or fileExt == '.jpeg' or fileExt == '.png':
                 date = datetime.now()
                 randomSuffix = "".join(random.choice(string.ascii_lowercase) for i in range(15))
-                self.attachedFilePath = "./assets/media/people-media/photos/" + \
-                                        "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + fileExt
-                self.attachedResizedFilePath = "./assets/media/people-media/photos_resized/" + \
-                                               "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + "_resized" + fileExt
-                self.attachedThumbnailPath = "./assets/media/people-media/photos_thumbnails/" + \
-                                             "{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + "_thumbnail" + ".png"
+
+                self.attachedFilePath = osPath.join("assets", "media", "people-media", "photos",
+                                                     ("{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + fileExt))
+                self.attachedResizedFilePath = osPath.join("assets", "media", "people-media", "photos_resized",
+                                                            ("{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + "_resized" + fileExt))
+                self.attachedThumbnailPath = osPath.join("assets", "media", "people-media", "photos_thumbnails",
+                                                            ("{:%d%b%Y_%Hh%Mm}".format(date) + randomSuffix + "_resized.png"))
+
 
                 QMessageBox.information(self, "Info", "File attached successfully")
 

@@ -134,8 +134,7 @@ class IssuesDropdownData():
 
     def statusItems(self):
         itemlist = ["Open", "Closed"]
-
-        return  itemlist
+        return itemlist
 
 class PeopleDropdownData():
     def emplTypeItems(self):
