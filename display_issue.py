@@ -112,10 +112,6 @@ class DisplayIssue(QWidget):
         self.deadlineEntry = QDateTimeEdit(calendarPopup=True)
         self.deadlineEntry.setDateTime(QDateTime.fromString(self.deadline, "yyyy-MM-dd h:mm AP"))
 
-        statusList = ["Open", "Closed"]
-        self.statusEntry = QComboBox()
-        self.statusEntry.addItems(statusList)
-
         self.updateBtn = QPushButton("Update")
         self.updateBtn.clicked.connect(self.updateIssue)
         self.deleteBtn = QPushButton("Delete")
@@ -188,7 +184,8 @@ class DisplayIssue(QWidget):
         inspDept = self.inspectedDeptEntry.currentText()
         inspContr = self.inspectedContrEntry.currentText()
         inspSubcontr = self.inspectedSubcontrEntry.currentText()
-        status_ = self.statusEntry.currentText()
+        status = self.statusEntry.currentText()
+        print(status)
         deadline = self.deadlineEntry.text()
 
         if (date and priority and observer and revTeam and inspectionName and theme and facility
@@ -213,7 +210,7 @@ class DisplayIssue(QWidget):
 
                 db.cur.execute(query, (date, priority, observer, revTeam, inspectionName, theme, facility,
                                        facilitySupervisor, specLocation, inspDept, inspContr, inspSubcontr,
-                                       deadline, status_, issueId))
+                                       deadline, status, issueId))
                 db.conn.commit()
 
                 QMessageBox.information(self, "Info", "Issue info updated")

@@ -15,7 +15,8 @@ import styles
 from backend import Database
 from add_facility import AddFacility
 from display_facility import DisplayFacility
-from pdf_generator import PDF
+from generator_pdf import PDF
+from generator_csv import CSV
 
 db = Database("sr-data.db")
 
@@ -319,33 +320,13 @@ class FacilityTab(QWidget):
     @Slot()
     def funcFacilitiesToCSV(self):
         indices = self.funcFacilitiesCheckBox()
-        # Check if there are any selected items
+
         if indices:
-            try:
-                date = datetime.datetime.now()
-
-                # Get file location and add timestamp to when it was created to the filename
-                fileName, _ = QFileDialog.getSaveFileName(
-                    self, "Save as...", "~/FacilitiesCSV" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".csv",
-                    "CSV files (*.csv)")
-                if fileName:
-                    with open(fileName, "w") as csv_file:
-                        csv_writer = csv.writer(csv_file, delimiter="|")
-                        # Setting cursor on the correct table
-                        db.cur.execute("SELECT * FROM facilities")
-                        # Get headers
-                        csv_writer.writerow([i[0] for i in db.cur.description])
-                        for index in indices:
-                            query = "SELECT * FROM facilities WHERE facility_id=?"
-                            facility_record = db.cur.execute(query, (index,)).fetchone()
-                            csv_writer.writerow(facility_record)
-
-                    QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
-            except:
-                QMessageBox.information(self, "Info", "Export failed")
+            CSV(self, "facilities", indices)
         else:
             QMessageBox.information(
-                self, "Info", "Nothing selected for export\nUse checkboxes to select facilities to export")
+                self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")
+
 
     @Slot()
     def funcFacilitiesToXLSX(self):

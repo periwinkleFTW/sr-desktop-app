@@ -15,7 +15,8 @@ import styles
 from backend import Database
 from add_person import AddPerson
 from display_person import DisplayPerson
-from pdf_generator import PDF
+from generator_pdf import PDF
+from generator_csv import CSV
 
 db = Database("sr-data.db")
 
@@ -476,33 +477,13 @@ class PeopleTab(QWidget):
     @Slot()
     def funcPeopleToCSV(self):
         indices = self.funcPeopleCheckBox()
-        # Check if there are any selected items
+
         if indices:
-            try:
-                date = datetime.datetime.now()
-
-                # Get file location and add timestamp to when it was created to the filename
-                fileName, _ = QFileDialog.getSaveFileName(
-                    self, "Save as...", "~/PeopleCSV" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".csv",
-                    "CSV files (*.csv)")
-                if fileName:
-                    with open(fileName, "w") as csv_file:
-                        csv_writer = csv.writer(csv_file, delimiter="|")
-                        # The purpose of this statement is to set cursor to correct table, needs rework because inefficient
-                        db.cur.execute("SELECT * FROM people")
-                        # Get headers from the table
-                        csv_writer.writerow([i[0] for i in db.cur.description])
-                        for index in indices:
-                            query = "SELECT * FROM people WHERE person_id=?"
-                            person_record = db.cur.execute(query, (index,)).fetchone()
-                            csv_writer.writerow(person_record)
-
-                    QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
-            except:
-                QMessageBox.information(self, "Info", "Export failed")
+            CSV(self, "people", indices)
         else:
             QMessageBox.information(
-                self, "Info", "Nothing selected for export\nUse checkboxes to select people to export")
+                self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")
+
 
     @Slot()
     def funcPeopleToXLSX(self):

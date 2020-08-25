@@ -12,7 +12,8 @@ import sys
 from backend import Database
 from add_issue import AddIssue
 from display_issue import DisplayIssue
-from pdf_generator import PDF
+from generator_pdf import PDF
+from generator_csv import CSV
 import styles
 
 db = Database("sr-data.db")
@@ -570,33 +571,13 @@ class IssuesTab(QWidget):
     @Slot()
     def funcIssuesToCSV(self):
         indices = self.funcIssuesCheckBox()
-        # Check if there are any selected items
+
         if indices:
-            try:
-                date = datetime.datetime.now()
-
-                # Get file location and add timestamp to when it was created to the filename
-                fileName, _ = QFileDialog.getSaveFileName(
-                    self, "Save as...", "~/IssuesCSV" + "{:%d%b%Y_%Hh%Mm}".format(date) + ".csv",
-                    "CSV files (*.csv)")
-                if fileName:
-                    with open(fileName, "w") as csv_file:
-                        csv_writer = csv.writer(csv_file, delimiter="|")
-                        # Setting cursor on the correct table
-                        db.cur.execute("SELECT * FROM issues")
-                        # Get headers
-                        csv_writer.writerow([i[0] for i in db.cur.description[:17]])
-                        for index in indices:
-                            query = "SELECT * FROM issues WHERE issue_id=?"
-                            facility_record = db.cur.execute(query, (index,)).fetchone()
-                            csv_writer.writerow(facility_record[:17])
-
-                    QMessageBox.information(self, "Info", "Data exported successfully into {}".format(fileName))
-            except:
-                QMessageBox.information(self, "Info", "Export failed")
+            CSV(self, "issues", indices)
         else:
             QMessageBox.information(
                 self, "Info", "Nothing selected for export\nUse checkboxes to select issues to export")
+
 
     @Slot()
     def funcIssuestoXLSX(self):
